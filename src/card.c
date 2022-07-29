@@ -9,13 +9,14 @@
 
 card_t **card_list;
 int card_list_len = 0;
+int cardpos = 0;
 
 /*
- * reads a file and stores its contents into cards contained in card_list, replacing the previous contents of card_list if successful
+ * reads a file containing cards and stores its contents into cards contained in card_list, replacing the previous contents of card_list if successful
  *
  * returns errno on file or memory allocation errors
  */
-int read_card(char *filename)
+int read_deck(char *filename)
 {
 	// Temp array used to store card data before it's transferred to card_list
 	// temp_card_list_len 	refers to the number of cards in the array
