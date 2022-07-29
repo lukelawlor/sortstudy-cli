@@ -1,24 +1,25 @@
 #include <stdio.h>
 #include <stdbool.h>
-#include <errno.h>
 #include <string.h>
 #include <stdlib.h>
+#include <errno.h>
 
+#include "util.h"
 #include "card.h"
 
 card_t **card_list;
 int card_list_len = 0;
 
 /*
- * int read_card(char *filename)
+ * reads a file and stores its contents into cards contained in card_list, replacing the previous contents of card_list if successful
  *
- * reads a file and stores its contents into cards contained in card_list
- *
- * returns nonzero on file or memory allocation errors
+ * returns errno on file or memory allocation errors
  */
 int read_card(char *filename)
 {
-	// Temp list used to store card data before it's transferred to card_list
+	// Temp array used to store card data before it's transferred to card_list
+	// temp_card_list_len 	refers to the number of cards in the array
+	// temp_card_list_size	refers to the number of elements the array can hold
 	int temp_card_list_len, temp_card_list_size;
 	card_t **temp_card_list, **temp_ptr;
 	card_t *card;
@@ -27,7 +28,7 @@ int read_card(char *filename)
 	if ((temp_card_list = calloc(temp_card_list_size, sizeof(card_t *))) == NULL)
 	{
 		perror("calloc");
-		return 1;
+		return errno;
 	}
 
 	// Vars for reading the card file
@@ -45,7 +46,7 @@ int read_card(char *filename)
 	if ((cardfile = fopen(filename, "r")) == NULL)
 	{
 		perror("fopen");
-		return 1;
+		return errno;
 	}
 
 	// Read the card file
@@ -125,25 +126,40 @@ int read_card(char *filename)
 	}
 	temp_card_list = temp_ptr;
 
-	// Resize card_list, then copy temp_card_list's contents into it
-	card_list_len = temp_card_list_len;
-	if ((temp_ptr = reallocarray(card_list, card_list_len, sizeof(card_t *))) == NULL)
+	// Resize card_list; if successful, free the remaining cards in card_list
+	if ((temp_ptr = reallocarray(card_list, temp_card_list_len, sizeof(card_t *))) == NULL)
 	{
 		perror("reallocarray");
 		goto read_card_error;
 	}
 	card_list = temp_ptr;
+	free_cards_in_list(card_list, min(card_list_len, temp_card_list_len));
 
+	// Copy the elements of temp_card_list into card_list, and set card_list_len
 	for (int i = 0; i < temp_card_list_len; i++)
 		card_list[i] = temp_card_list[i];
-	free(temp_card_list);
+	card_list_len = temp_card_list_len;
 
+	free(temp_card_list);
 	return 0;
 	
 	// Free temp list & its contents on random errors
 	read_card_error:
-	for (int i = 0; i < temp_card_list_len; i++)
-		free(temp_card_list[i]);
+
+	free_cards_in_list(temp_card_list, temp_card_list_len);
 	free(temp_card_list);
-	return 1;
+	return errno;
+}
+
+/*
+ * frees the elements in a card list (type card_t **) this does not free the array itself
+ */
+void free_cards_in_list(card_t **list, int len)
+{
+	for (int i = 0; i < len; i++)
+	{
+		free(list[i]->front);
+		free(list[i]->back);
+		free(list[i]);
+	}
 }
