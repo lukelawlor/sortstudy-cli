@@ -6,7 +6,7 @@ OBJS := $(SRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
 DEPS := $(OBJS:.o=.d)
 
 CC := gcc
-CFLAGS := -Wall
+CFLAGS := -g -Wall
 DEPFLAGS := -MMD -MP
 LDFLAGS := -lncurses
 
@@ -14,7 +14,7 @@ BIN := $(BUILD_DIR)/sortstudy
 
 all: $(BIN)
 
-$(BIN): %(OBJS)
+$(BIN): $(OBJS)
 	$(CC) $(OBJS) -o $@ $(LDFLAGS)
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
@@ -27,6 +27,6 @@ clean:
 	rm -rf $(BUILD_DIR)
 
 run: $(BIN)
-	$(BIN)
+	@$(BIN)
 
 -include $(DEPS)
