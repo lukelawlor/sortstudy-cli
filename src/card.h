@@ -7,4 +7,4 @@ typedef struct card{
 extern card_t **card_list;
 extern int card_list_len;
 int read_card(char *);
-void free_cards_in_list(card_t **, int);
+void free_card_list(card_t **, int);

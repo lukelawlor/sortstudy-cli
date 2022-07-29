@@ -126,16 +126,17 @@ int read_card(char *filename)
 	}
 	temp_card_list = temp_ptr;
 
-	// Resize card_list; if successful, free the remaining cards in card_list
-	if ((temp_ptr = reallocarray(card_list, temp_card_list_len, sizeof(card_t *))) == NULL)
+	// Allocate new space for card_list; if successful, free the cards in card_list and change its
+	// value to the pointer of the new space
+	if ((temp_ptr = calloc(temp_card_list_len, sizeof(card_t *))) == NULL)
 	{
-		perror("reallocarray");
+		perror("calloc");
 		goto read_card_error;
 	}
+	free_card_list(card_list, card_list_len);
 	card_list = temp_ptr;
-	free_cards_in_list(card_list, min(card_list_len, temp_card_list_len));
 
-	// Copy the elements of temp_card_list into card_list, and set card_list_len
+	// Copy the elements of temp_card_list into card_list, then set card_list_len
 	for (int i = 0; i < temp_card_list_len; i++)
 		card_list[i] = temp_card_list[i];
 	card_list_len = temp_card_list_len;
@@ -146,15 +147,14 @@ int read_card(char *filename)
 	// Free temp list & its contents on random errors
 	read_card_error:
 
-	free_cards_in_list(temp_card_list, temp_card_list_len);
-	free(temp_card_list);
+	free_card_list(temp_card_list, temp_card_list_len);
 	return errno;
 }
 
 /*
- * frees the elements in a card list (type card_t **) this does not free the array itself
+ * frees a card list (type card_t **) and all of its elements
  */
-void free_cards_in_list(card_t **list, int len)
+void free_card_list(card_t **list, int len)
 {
 	for (int i = 0; i < len; i++)
 	{
@@ -162,4 +162,5 @@ void free_cards_in_list(card_t **list, int len)
 		free(list[i]->back);
 		free(list[i]);
 	}
+	free(list);
 }
