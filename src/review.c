@@ -8,10 +8,13 @@
 #include "card.h"
 #include "review.h"
 
+#define	SMALL_WIN_TEXT	"This window is too small to run sort study"
 #define INFO_WIN_H	4
 #define INFO_WIN_W	20
 #define	CARD_WIN_H	4
 #define	CARD_WIN_W	20
+#define	MIN_H		20
+#define	MIN_W		40
 
 #define	draw_infowin()	mvwprintw(infowin, 0, 0, "card %d/%d\nright: %d\nwrong: %d", cardpos + 1, card_list_len, right_cards, wrong_cards)
 #define draw_frontwin()	mvwaddstr(frontwin, 0, 0, fronttext)
@@ -30,7 +33,7 @@ static int right_cards, wrong_cards;
 static int cardpos;
 
 static int init_windows(void);
-static void resize_windows(void);
+static void resize_window(void);
 
 void start_review_mode(void)
 {
@@ -100,7 +103,7 @@ void start_review_mode(void)
 				}
 				case KEY_RESIZE:
 				{
-					resize_windows();
+					resize_window();
 					goto get_input;
 				}
 				case 'q':
@@ -149,11 +152,50 @@ static int init_windows(void)
 	return 0;
 }
 
-static void resize_windows(void)
+/*
+ * checks if the window's new dimensions are greater than or equal to MIN_H and MIN_W
+ * 	if they aren't, wait for the user to resize the window to a proper size;
+ * 	if they are, redraw the text on the screen and move the card windows to the center of the screen
+ */
+static void resize_window(void)
 {
 	int mx, my;
-
 	getmaxyx(stdscr, my, mx);
+
+	// Check if the window's dimensions are below its minimum width and height
+	if (my < MIN_H || mx < MIN_W)
+	{
+		// Delete every window other than stdscr so stdscr can be used
+		delwin(infowin);
+		delwin(frontwin);
+		delwin(backwin);
+
+		// Enable special keys on stdscr so KEY_RESIZE can be listened for
+		if (keypad(stdscr, true) == ERR)
+		{
+			perror("keypad");
+			end_program(errno);
+		}
+
+		// Show the small window text and wait for the user to resize
+		// the window so that the dimensions are >=  MIN_H and MIN_W
+		do
+		{
+			wclear(stdscr);
+			mvwaddstr(stdscr, 0, 0, SMALL_WIN_TEXT);
+			wrefresh(stdscr);
+			if (wgetch(stdscr) == KEY_RESIZE)
+				getmaxyx(stdscr, my, mx);
+		}
+		while (my < MIN_H || mx < MIN_W);
+
+		// Clear the small window text and reinitialize the old windows
+		wclear(stdscr);
+		wrefresh(stdscr);
+
+		if (init_windows() != 0)
+			end_program(errno);
+	}
 
 	wclear(infowin);
 	wclear(frontwin);
