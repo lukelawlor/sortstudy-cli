@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <ctype.h>
+#include <string.h>
 #include <errno.h>
 
 #include <ncurses.h>
@@ -31,7 +32,7 @@ static char *fronttext, *backtext;
 static bool showback = false;
 
 // Controls the visibility of borders on all windows
-static bool showborders = true;
+static bool showborders = false;
 
 // No. of cards marked right or wrong
 static int right_cards, wrong_cards;
@@ -280,5 +281,11 @@ static void draw_card_win(WINDOW *win, char *text)
 			waddch(win, '>');
 	}
 	else
+	{
 		mvwaddstr(win, 0, 0, text);
+
+		// Draw ">" for same reason as above
+		if (strlen(text) > (card_win_w * card_win_h))
+			mvwaddch(win, card_win_h - 1, card_win_w - 1, '>');
+	}
 }
