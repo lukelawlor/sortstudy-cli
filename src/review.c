@@ -47,10 +47,17 @@ static int card_win_w = 20;
 static int init_windows(void);
 static void resize_window(void);
 static void draw_infowin(void);
-static void draw_card_win(WINDOW *win, char *text);
+static void draw_card_win(WINDOW *, char *);
+static void prevent_small_screen(int, int);
 
 void start_review_mode(void)
 {
+	{
+		int my, mx;
+		getmaxyx(stdscr, my, mx);
+		prevent_small_screen(my, mx);
+	}
+
 	if (init_windows() != 0)
 		end_program(errno);
 
@@ -180,40 +187,7 @@ static void resize_window(void)
 	int mx, my;
 	getmaxyx(stdscr, my, mx);
 
-	// Check if the window's dimensions are below its minimum width and height
-	if (my < MIN_H || mx < MIN_W)
-	{
-		// Delete every window other than stdscr so stdscr can be used
-		delwin(infowin);
-		delwin(frontwin);
-		delwin(backwin);
-
-		// Enable special keys on stdscr so KEY_RESIZE can be listened for
-		if (keypad(stdscr, true) == ERR)
-		{
-			perror("keypad");
-			end_program(errno);
-		}
-
-		// Show the small window text and wait for the user to resize
-		// the window so that the dimensions are >=  MIN_H and MIN_W
-		do
-		{
-			wclear(stdscr);
-			mvwaddstr(stdscr, 0, 0, SMALL_WIN_TEXT);
-			wrefresh(stdscr);
-			if (wgetch(stdscr) == KEY_RESIZE)
-				getmaxyx(stdscr, my, mx);
-		}
-		while (my < MIN_H || mx < MIN_W);
-
-		// Clear the small window text and reinitialize the old windows
-		wclear(stdscr);
-		wrefresh(stdscr);
-
-		if (init_windows() != 0)
-			end_program(errno);
-	}
+	prevent_small_screen(my, mx);
 
 	wclear(infowin);
 	wclear(frontwin);
@@ -287,5 +261,53 @@ static void draw_card_win(WINDOW *win, char *text)
 		// Draw ">" for same reason as above
 		if (strlen(text) > (card_win_w * card_win_h))
 			mvwaddch(win, card_win_h - 1, card_win_w - 1, '>');
+	}
+}
+
+/*
+ * checks if the screen dimensions are below MIN_W or MIN_H;
+ * 	if they are, wait until the user resizes the screen to proper dimensions
+ *
+ * args:
+ * 	my - screen height
+ * 	mx - screen width
+ */
+static void prevent_small_screen(int my, int mx)
+{
+	if (my < MIN_H || mx < MIN_W)
+	{
+		// Delete every window other than stdscr so stdscr can be used
+		delwin(infowin);
+		delwin(frontwin);
+		delwin(backwin);
+
+		// Enable special keys on stdscr so KEY_RESIZE can be listened for
+		if (keypad(stdscr, true) == ERR)
+		{
+			perror("keypad");
+			end_program(errno);
+		}
+
+		// Show the small window text and wait for the user to resize
+		// the window so that the dimensions are >=  MIN_H and MIN_W
+		int c;
+		do
+		{
+			wclear(stdscr);
+			mvwaddstr(stdscr, 0, 0, SMALL_WIN_TEXT);
+			wrefresh(stdscr);
+			if ((c = wgetch(stdscr)) == KEY_RESIZE)
+				getmaxyx(stdscr, my, mx);
+			else if (c == 'q')
+				end_program(0);
+		}
+		while (my < MIN_H || mx < MIN_W);
+
+		// Clear the small window text and reinitialize the old windows
+		wclear(stdscr);
+		wrefresh(stdscr);
+
+		if (init_windows() != 0)
+			end_program(errno);
 	}
 }
