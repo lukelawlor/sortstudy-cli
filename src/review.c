@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <string.h>
 #include <ctype.h>
 #include <errno.h>
 
@@ -21,6 +22,9 @@ int cardpos;
 
 // Number of cards in the current review
 int numcards;
+
+// Text containing last action made by the user to display in the info window
+char lastaction[100];
 
 void start_review_mode(void)
 {
@@ -91,6 +95,7 @@ void start_review_mode(void)
 					review_list[i] = true;
 					all_cards_right = false;
 					wrong_cards++;
+					strncpy(lastaction, "Marked card wrong", 18);
 					break;
 				}
 				case 'l':
@@ -98,6 +103,7 @@ void start_review_mode(void)
 					// Mark card as right
 					review_list[i] = false;
 					right_cards++;
+					strncpy(lastaction, "Marked card right", 18);
 					break;
 				}
 				case 'b':

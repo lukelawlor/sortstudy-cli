@@ -69,11 +69,11 @@ void draw_infowin(void)
 {
 	if (showborders)
 	{
-		mvwprintw(infowin, 1, 1, "card %d/%d\n right: %d\n wrong: %d", cardpos + 1, numcards, right_cards, wrong_cards);
+		mvwprintw(infowin, 1, 1, "Card %d/%d\n Right: %d\n Wrong: %d\n\n %s", cardpos + 1, numcards, right_cards, wrong_cards, lastaction);
 		wborder(infowin, 0, 0, 0, 0, 0, 0, 0, 0);
 	}
 	else
-		mvwprintw(infowin, 0, 0, "card %d/%d\nright: %d\nwrong: %d", cardpos + 1, numcards, right_cards, wrong_cards);
+		mvwprintw(infowin, 0, 0, "Card %d/%d\nRight: %d\nWrong: %d\n\n%s", cardpos + 1, numcards, right_cards, wrong_cards, lastaction);
 }
 
 /*
