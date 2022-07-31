@@ -9,16 +9,20 @@
 #include "review.h"
 
 #define	SMALL_WIN_TEXT	"This window is too small to run sort study"
-#define INFO_WIN_H	4
+#define INFO_WIN_H	6
 #define INFO_WIN_W	20
-#define	CARD_WIN_H	4
-#define	CARD_WIN_W	20
-#define	MIN_H		20
-#define	MIN_W		40
+#define	MIN_H		22
+#define	MIN_W		22
 
-#define	draw_infowin()	mvwprintw(infowin, 0, 0, "card %d/%d\nright: %d\nwrong: %d", cardpos + 1, card_list_len, right_cards, wrong_cards)
-#define draw_frontwin()	mvwaddstr(frontwin, 0, 0, fronttext)
-#define	draw_backwin()	mvwaddstr(backwin, 0, 0, backtext)
+// Get the y position of the front or back card based on the height of the screen
+#define	GET_FRONT_WIN_Y(my)	(my - INFO_WIN_H) / 2 - 1 - card_win_h + INFO_WIN_H
+#define	GET_BACK_WIN_Y(my)	(my - INFO_WIN_H) / 2 + INFO_WIN_H
+
+// Get the x position of a card based on the width of the screen
+#define	GET_CARD_WIN_X(mx)	mx / 2 - card_win_w / 2
+
+#define	DRAW_FRONTWIN()		draw_card_win(frontwin, fronttext)
+#define	DRAW_BACKWIN()		draw_card_win(backwin, backtext)
 
 static WINDOW *infowin, *frontwin, *backwin;
 static char *fronttext, *backtext;
@@ -26,14 +30,23 @@ static char *fronttext, *backtext;
 // Controls the visibility of the back of the card being viewed
 static bool showback = false;
 
+// Controls the visibility of borders on all windows
+static bool showborders = true;
+
 // No. of cards marked right or wrong
 static int right_cards, wrong_cards;
 
 // Index of current card being read
 static int cardpos;
 
+// Dimensions of card windows
+static int card_win_h = 4;
+static int card_win_w = 20;
+
 static int init_windows(void);
 static void resize_window(void);
+static void draw_infowin(void);
+static void draw_card_win(WINDOW *win, char *text);
 
 void start_review_mode(void)
 {
@@ -65,7 +78,7 @@ void start_review_mode(void)
 
 			// Display the front of the card
 			wclear(frontwin);
-			draw_frontwin();
+			DRAW_FRONTWIN();
 			wrefresh(frontwin);
 
 			// Display misc info
@@ -80,7 +93,7 @@ void start_review_mode(void)
 				{
 					// Toggle back of card visibility
 					if ((showback = showback ? false : true) == true)
-						draw_backwin();
+						DRAW_BACKWIN();
 					else
 						wclear(backwin);
 					wrefresh(backwin);
@@ -133,8 +146,12 @@ static int init_windows(void)
 
 	getmaxyx(stdscr, my, mx);
 	infowin = newwin(INFO_WIN_H, INFO_WIN_W, 0, 0);
-	frontwin = newwin(CARD_WIN_H, CARD_WIN_W, my / 2 - 1 - CARD_WIN_H, mx / 2 - CARD_WIN_W / 2);
-	backwin = newwin(CARD_WIN_H, CARD_WIN_W, my / 2 + 1, mx / 2 - CARD_WIN_W / 2);
+
+	card_win_w = mx - 10;
+	card_win_h = (my - INFO_WIN_H) / 2 - 2;
+
+	frontwin = newwin(card_win_h, card_win_w, GET_FRONT_WIN_Y(my), GET_CARD_WIN_X(mx));
+	backwin = newwin(card_win_h, card_win_w, GET_BACK_WIN_Y(my), GET_CARD_WIN_X(mx));
 
 	if (infowin == NULL || frontwin == NULL || backwin == NULL)
 	{
@@ -204,17 +221,64 @@ static void resize_window(void)
 	wrefresh(frontwin);
 	wrefresh(backwin);
 
-	mvwin(frontwin, my / 2 - 1 - CARD_WIN_H, mx / 2 - CARD_WIN_W / 2);
-	mvwin(backwin, my / 2 + 1, mx / 2 - CARD_WIN_W / 2);
+	card_win_w = mx - 10;
+	card_win_h = (my - INFO_WIN_H) / 2 - 2;
+
+	mvwin(frontwin, GET_FRONT_WIN_Y(my), GET_CARD_WIN_X(mx));
+	mvwin(backwin, GET_BACK_WIN_Y(my), GET_CARD_WIN_X(mx));
+	wresize(frontwin, card_win_h, card_win_w);
+	wresize(backwin, card_win_h, card_win_w);
 
 	draw_infowin();
-	draw_frontwin();
+	DRAW_FRONTWIN();
 	wrefresh(infowin);
 	wrefresh(frontwin);
 
 	if (showback)
 	{
-		draw_backwin();
+		DRAW_BACKWIN();
 		wrefresh(backwin);
 	}
+}
+
+static void draw_infowin(void)
+{
+	if (showborders)
+	{
+		mvwprintw(infowin, 1, 1, "card %d/%d\n right: %d\n wrong: %d", cardpos + 1, card_list_len, right_cards, wrong_cards);
+		wborder(infowin, 0, 0, 0, 0, 0, 0, 0, 0);
+	}
+	else
+		mvwprintw(infowin, 0, 0, "card %d/%d\nright: %d\nwrong: %d", cardpos + 1, card_list_len, right_cards, wrong_cards);
+}
+
+static void draw_card_win(WINDOW *win, char *text)
+{
+	if (showborders)
+	{
+		wborder(win, 0, 0, 0, 0, 0, 0, 0, 0);
+
+		// Draw text within border
+		bool full_text_drawn = false;
+		int c;
+		wmove(win, 1, 1);
+		for (int i = 0; i < ((card_win_w - 2) * (card_win_h - 2)); i++)
+		{
+			if ((c = text[i]) == '\0')
+			{
+				full_text_drawn = true;
+				break;
+			}
+
+			if (i % (card_win_w - 2) == 0)
+				wmove(win, 1 + (i / (card_win_w - 2)), 1);
+			waddch(win, c);
+		}
+
+		// Draw ">" on the border when the full text on the card is too large to be drawn
+		if (!full_text_drawn)
+			waddch(win, '>');
+	}
+	else
+		mvwaddstr(win, 0, 0, text);
 }
