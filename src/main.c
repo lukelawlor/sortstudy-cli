@@ -1,66 +1,34 @@
-#include <stdio.h>
-#include <stdbool.h>
-#include <ctype.h>
 #include <stdlib.h>
 #include <errno.h>
 
 #include <ncurses.h>
 
+#include "main.h"
 #include "card.h"
+#include "review.h"
 
 int main(void)
 {
 	// Init ncurses
 	if (initscr() == NULL)
 	{
-		perror("failed to init ncurses");
+		perror("failed to initialize ncurses");
 		exit(errno);
 	}
-	noecho();
 
-	read_deck("data/card.txt");
-
-	for (;;)
+	// Don't draw pressed keys on the screen
+	if (noecho() == ERR)
 	{
-		bool showback = false;
-		for (cardpos = 0; cardpos < card_list_len; cardpos++)
-		{
-			clear();
-			mvprintw(0, 0, card_list[cardpos]->front);
-
-			get_input:
-			switch (tolower(getch()))
-			{
-				case 'j':
-				{
-					if ((showback = showback ? false : true) == true)
-						mvprintw(2, 0, card_list[cardpos]->back);
-					else
-					{
-						// Erase back of card from screen
-						clear();
-						mvprintw(0, 0, card_list[cardpos]->front);
-					}
-					goto get_input;
-				}
-				case 'k':	// fallthrough
-				case 'l':
-				{
-					
-					break;
-				}
-				case 'q':
-				{
-					goto close_program;
-				}
-				default:
-					goto get_input;
-			}
-		}
+		perror("noecho");
+		end_program(errno);
 	}
 
-	close_program:
-	endwin();
-	exit(0);
+	read_deck("data/card.txt");
+	start_review_mode();
 }
 
+void end_program(int exitcode)
+{
+	endwin();
+	exit(exitcode);
+}

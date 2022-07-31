@@ -5,6 +5,7 @@ typedef struct card{
 	char *back;
 } card_t;
 extern card_t **card_list;
-extern int card_list_len, cardpos;
+extern int card_list_len;
+extern bool *review_list;
 int read_deck(char *);
 void free_card_list(card_t **, int);

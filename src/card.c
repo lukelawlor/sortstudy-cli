@@ -7,12 +7,16 @@
 #include "util.h"
 #include "card.h"
 
+// Array holding card structs
 card_t **card_list;
-int card_list_len = 0;
-int cardpos = 0;
+int card_list_len;
+
+// Array in which each index corresponds to a card in card_list;
+// A value of true indicates that the corresponding card is marked for review
+bool *review_list;
 
 /*
- * reads a file containing cards and stores its contents into cards contained in card_list, replacing the previous contents of card_list if successful
+ * reads a file containing card text and stores its contents into cards contained in card_list, replacing the previous contents of card_list if successful, and resizing review_list to hold the maximum amount of cards needed to review
  *
  * returns errno on file or memory allocation errors
  */
@@ -22,7 +26,7 @@ int read_deck(char *filename)
 	// temp_card_list_len 	refers to the number of cards in the array
 	// temp_card_list_size	refers to the number of elements the array can hold
 	int temp_card_list_len, temp_card_list_size;
-	card_t **temp_card_list, **temp_ptr;
+	card_t **temp_card_list, **temp_card_ptr;
 	card_t *card;
 
 	temp_card_list_size = CARD_ARRAY_ESTSIZE;
@@ -65,20 +69,20 @@ int read_deck(char *filename)
 				if ((card = malloc(sizeof(card_t))) == NULL)
 				{
 					perror("malloc");
-					goto read_card_error;
+					goto read_deck_error;
 				}
 				if ((card->front = calloc(bp, sizeof(char))) == NULL)
 				{
 					perror("malloc");
 					free(card);
-					goto read_card_error;
+					goto read_deck_error;
 				}
 				if ((card->back = calloc(bp, sizeof(char))) == NULL)
 				{
 					perror("malloc");
 					free(card->front);
 					free(card);
-					goto read_card_error;
+					goto read_deck_error;
 				}
 
 				// Copy buffer into the front text of the card
@@ -89,12 +93,12 @@ int read_deck(char *filename)
 				if (temp_card_list_len >= temp_card_list_size)
 				{
 					temp_card_list_size += CARD_ARRAY_ESTSIZE;
-					if ((temp_ptr = reallocarray(temp_card_list, temp_card_list_size, sizeof(card_t *))) == NULL)
+					if ((temp_card_ptr = reallocarray(temp_card_list, temp_card_list_size, sizeof(card_t *))) == NULL)
 					{
 						perror("reallocarray");
-						goto read_card_error;
+						goto read_deck_error;
 					}
-					temp_card_list = temp_ptr;
+					temp_card_list = temp_card_ptr;
 				}
 				temp_card_list[temp_card_list_len] = card;
 			}
@@ -116,26 +120,39 @@ int read_deck(char *filename)
 	if (fclose(cardfile) == EOF)
 	{
 		perror("fclose");
-		goto read_card_error;
+		goto read_deck_error;
 	}
 
 	// Resize the list to fit the actual number of card pointers it contains
-	if ((temp_ptr = reallocarray(temp_card_list, temp_card_list_len, sizeof(card_t *))) == NULL)
+	if ((temp_card_ptr = reallocarray(temp_card_list, temp_card_list_len, sizeof(card_t *))) == NULL)
 	{
 		perror("reallocarray");
-		goto read_card_error;
+		goto read_deck_error;
 	}
-	temp_card_list = temp_ptr;
+	temp_card_list = temp_card_ptr;
 
-	// Allocate new space for card_list; if successful, free the cards in card_list and change its
-	// value to the pointer of the new space
-	if ((temp_ptr = calloc(temp_card_list_len, sizeof(card_t *))) == NULL)
+	// Resize review_list 
+	bool *temp_bool_ptr;
+	if ((temp_bool_ptr = reallocarray(review_list, temp_card_list_len, sizeof(bool))) == NULL)
+	{
+		perror("reallocarray");
+		goto read_deck_error;
+	}
+	review_list = temp_bool_ptr;
+
+	// Set all elements in review_list to true
+	for (int i = 0; i < temp_card_list_len; i++)
+		review_list[i] = true;
+
+	// Alloc new mem for card_list; if successful, free everything in card_list and its value
+	// to the new pointer
+	if ((temp_card_ptr = calloc(temp_card_list_len, sizeof(card_t *))) == NULL)
 	{
 		perror("calloc");
-		goto read_card_error;
+		goto read_deck_error;
 	}
 	free_card_list(card_list, card_list_len);
-	card_list = temp_ptr;
+	card_list = temp_card_ptr;
 
 	// Copy the elements of temp_card_list into card_list, then set card_list_len
 	for (int i = 0; i < temp_card_list_len; i++)
@@ -146,7 +163,7 @@ int read_deck(char *filename)
 	return 0;
 	
 	// Free temp list & its contents on random errors
-	read_card_error:
+	read_deck_error:
 
 	free_card_list(temp_card_list, temp_card_list_len);
 	return errno;
