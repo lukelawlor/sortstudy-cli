@@ -27,7 +27,7 @@ char *fronttext, *backtext;
 bool showback = false;
 
 // Controls the visibility of borders on all windows
-bool showborders = false;
+bool showborders = true;
 
 // Dimensions of card windows
 static int card_win_h = 4;
