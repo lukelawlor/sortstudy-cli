@@ -5,11 +5,13 @@
 
 #include <ncurses.h>
 
+#include "util.h"
 #include "review_ui.h"
 #include "review.h"
 
-#define INFO_WIN_H		6
-#define INFO_WIN_W		20
+#define INFO_WIN_H		7
+#define INFO_WIN_W		30
+#define CARD_WIN_PADDING	3
 
 // Get the y position of the front or back card based on the height of the screen
 #define	GET_FRONT_WIN_Y(my)	(my - INFO_WIN_H) / 2 - 1 - card_win_h + INFO_WIN_H
@@ -43,7 +45,7 @@ int init_windows(void)
 	getmaxyx(stdscr, my, mx);
 	infowin = newwin(INFO_WIN_H, INFO_WIN_W, 0, 0);
 
-	card_win_w = mx - 10;
+	card_win_w = mx - CARD_WIN_PADDING * 2;
 	card_win_h = (my - INFO_WIN_H) / 2 - 2;
 
 	frontwin = newwin(card_win_h, card_win_w, GET_FRONT_WIN_Y(my), GET_CARD_WIN_X(mx));
@@ -87,24 +89,43 @@ void draw_card_win(WINDOW *win, char *text)
 
 		// Draw text within border
 		bool full_text_drawn = false;
-		int c;
-		wmove(win, 1, 1);
-		for (int i = 0; i < ((card_win_w - 2) * (card_win_h - 2)); i++)
+		int c, y, x, i;
+
+		i = 0;
+		y = 1;
+		x = 1;
+		wmove(win, y, x);
+
+		for (;;)
 		{
-			if ((c = text[i]) == '\0')
+			if ((c = text[i++]) == '\0')
 			{
 				full_text_drawn = true;
 				break;
 			}
 
-			if (i % (card_win_w - 2) == 0)
-				wmove(win, 1 + (i / (card_win_w - 2)), 1);
-			waddch(win, c);
+			// Move 1 line down if a newline is read; don't print the newline
+			if (c == '\n')
+			{
+				wmove(win, ++y, (x = 1));
+				if (y > card_win_h - 2)
+					break;
+			}
+			else
+			{
+				// Move 1 line down if the cursor reaches the edge of the screen
+				if (x % (card_win_w - 1) == 0)
+					wmove(win, ++y, (x = 1));
+				if (y > card_win_h - 2)
+					break;
+				waddch(win, c);
+			}
+			x++;
 		}
 
 		// Draw ">" on the border when the full text on the card is too large to be drawn
 		if (!full_text_drawn)
-			waddch(win, '>');
+			mvwaddch(win, card_win_h - 2, card_win_w - 1, '>');
 	}
 	else
 	{
@@ -135,7 +156,7 @@ void resize_window(void)
 	wrefresh(frontwin);
 	wrefresh(backwin);
 
-	card_win_w = mx - 10;
+	card_win_w = mx - CARD_WIN_PADDING * 2;
 	card_win_h = (my - INFO_WIN_H) / 2 - 2;
 
 	mvwin(frontwin, GET_FRONT_WIN_Y(my), GET_CARD_WIN_X(mx));

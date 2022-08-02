@@ -10,9 +10,10 @@
 #include "review_ui.h"
 #include "review.h"
 
+#define	REVIEW_FINISH_TEXT	"Review Complete!\n  Press L to start the next review\n  Press S to shuffle the cards (not implemented)\n  Press F to flip the cards (not implemented)"
 #define	SMALL_WIN_TEXT		"This window is too small to run sort study"
 #define	MIN_SCREEN_H		22
-#define	MIN_SCREEN_W		22
+#define	MIN_SCREEN_W		24
 
 // No. of cards marked right or wrong
 int right_cards, wrong_cards;
@@ -24,7 +25,10 @@ int cardpos;
 int numcards;
 
 // Text containing last action made by the user to display in the info window
-char lastaction[100];
+char lastaction[20];
+
+// Text containing the type of review being carried out
+char reviewtype[20];
 
 void start_review_mode(void)
 {
@@ -43,6 +47,7 @@ void start_review_mode(void)
 	// Review loop
 	for (;;)
 	{
+		next_review:
 		all_cards_right = true;
 		for (int i = 0; i < card_list_len; i++)
 		{
@@ -60,7 +65,6 @@ void start_review_mode(void)
 			showback = false;
 
 			// Draw the back of the card
-			redraw_windows:
 			wclear(backwin);
 			if (showback)
 				DRAW_BACKWIN();
@@ -106,10 +110,9 @@ void start_review_mode(void)
 					strncpy(lastaction, "Marked card right", 18);
 					break;
 				}
-				case 'b':
+				case 'b':	// fall through
 				{
 					showborders = showborders ? false : true;
-					goto redraw_windows;
 				}
 				case KEY_RESIZE:
 				{
@@ -129,6 +132,37 @@ void start_review_mode(void)
 		if (all_cards_right)
 			for (int i = 0; i < card_list_len; i++)
 				review_list[i] = true;
+
+		// Show finished review screen
+		wclear(frontwin);
+		wclear(backwin);
+		fronttext = REVIEW_FINISH_TEXT;
+		backtext = "";
+		DRAW_FRONTWIN();
+
+		for (;;)
+		{
+			switch (tolower(wgetch(frontwin)))
+			{
+				case 'l':
+				{
+					goto next_review;
+				}
+				case 'q':
+				{
+					end_program(0);
+				}
+				case 'b':	// fall through
+				{
+					showborders = showborders ? false : true;
+				}
+				case KEY_RESIZE:
+				{
+					resize_window();
+					break;
+				}
+			}
+		}
 	}
 }
 
@@ -148,13 +182,6 @@ void prevent_small_screen(int my, int mx)
 		delwin(infowin);
 		delwin(frontwin);
 		delwin(backwin);
-
-		// Enable special keys on stdscr so KEY_RESIZE can be listened for
-		if (keypad(stdscr, true) == ERR)
-		{
-			perror("keypad");
-			end_program(errno);
-		}
 
 		// Show the small window text and wait for the user to resize
 		// the window so that the dimensions are >=  MIN_H and MIN_W

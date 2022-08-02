@@ -23,6 +23,13 @@ int main(void)
 		end_program(errno);
 	}
 
+	// Enable special keys for the standard screen
+	if (keypad(stdscr, true) == ERR)
+	{
+		perror("keypad");
+		end_program(errno);
+	}
+
 	read_deck("data/card.txt");
 	start_review_mode();
 }
