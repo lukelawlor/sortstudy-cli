@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
 
@@ -7,8 +8,20 @@
 #include "card.h"
 #include "review.h"
 
-int main(void)
+int main(int argc, char **argv)
 {
+	// Handle command line argument errors
+	if (argc != 2)
+	{
+		endwin();
+		printf("usage: sortstudy CARD_FILE\n");
+		exit(1);
+	}
+
+	// Read the card deck from argv
+	if (read_deck(argv[1]) != 0)
+		end_program(errno);
+
 	// Init ncurses
 	if (initscr() == NULL)
 	{
@@ -30,7 +43,6 @@ int main(void)
 		end_program(errno);
 	}
 
-	read_deck("data/card.txt");
 	start_review_mode();
 }
 
