@@ -9,8 +9,8 @@
 #include "review_ui.h"
 #include "review.h"
 
-#define INFO_WIN_H		7
-#define INFO_WIN_W		30
+#define INFO_WIN_H		6
+#define INFO_WIN_W		20
 #define CARD_WIN_PADDING	3
 
 // Get the y position of the front or back card based on the height of the screen
@@ -69,13 +69,35 @@ int init_windows(void)
 
 void draw_infowin(void)
 {
-	if (showborders)
-	{
-		mvwprintw(infowin, 1, 1, "Card %d/%d\n Right: %d\n Wrong: %d\n\n %s", cardpos + 1, numcards, right_cards, wrong_cards, lastaction);
-		wborder(infowin, 0, 0, 0, 0, 0, 0, 0, 0);
-	}
+	// Print cardpos/numcards
+	wmove(infowin, 0, 0);
+	if (cardpos > MAX_INFO_CARDS)
+		waddstr(infowin, "Card " STR(MAX_INFO_CARDS) "+/");
 	else
-		mvwprintw(infowin, 0, 0, "Card %d/%d\nRight: %d\nWrong: %d\n\n%s", cardpos + 1, numcards, right_cards, wrong_cards, lastaction);
+		wprintw(infowin, "Card %d/", cardpos);
+	if (numcards > MAX_INFO_CARDS)
+		waddstr(infowin, STR(MAX_INFO_CARDS) "+\n");
+	else
+		wprintw(infowin, "%d\n", numcards);
+	
+	// Print right_cards and wrong_cards
+	if (right_cards > MAX_INFO_RIGHTWRONG)
+		waddstr(infowin, "Right: " STR(MAX_INFO_RIGHTWRONG) "+\n");
+	else
+		wprintw(infowin, "Right: %d\n", right_cards);
+	if (wrong_cards > MAX_INFO_RIGHTWRONG)
+		waddstr(infowin, "Wrong: " STR(MAX_INFO_RIGHTWRONG) "+\n");
+	else
+		wprintw(infowin, "Wrong: %d\n", wrong_cards);
+	
+	// Print the type of review and lastaction
+	if (is_full_review)
+		mvwaddstr(infowin, 4, 0, "Full Review ");
+	else
+		mvwaddstr(infowin, 4, 0, "Reviewing ");
+	wprintw(infowin, "%d cards", numcards);
+
+	mvwaddstr(infowin, 5, 0, lastaction);
 }
 
 /*

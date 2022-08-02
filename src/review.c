@@ -24,11 +24,13 @@ int cardpos;
 // Number of cards in the current review
 int numcards;
 
+// True if the review covers all cards
+bool is_full_review = true;
+
 // Text containing last action made by the user to display in the info window
 char lastaction[20];
 
-// Text containing the type of review being carried out
-char reviewtype[20];
+static void set_numcards(void);
 
 void start_review_mode(void)
 {
@@ -41,6 +43,8 @@ void start_review_mode(void)
 	if (init_windows() != 0)
 		end_program(errno);
 
+	numcards = card_list_len;
+
 	// Keeps track of whether or not the user has marked all cards right
 	bool all_cards_right = true;
 
@@ -48,7 +52,9 @@ void start_review_mode(void)
 	for (;;)
 	{
 		next_review:
+		cardpos = 1;
 		all_cards_right = true;
+		strncpy(lastaction, "New review started", 19);
 		for (int i = 0; i < card_list_len; i++)
 		{
 			// Don't display cards that haven't been marked for review
@@ -56,8 +62,6 @@ void start_review_mode(void)
 				continue;
 	
 			// Update global variables used for drawing
-			cardpos = i;
-			numcards = card_list_len;
 			fronttext = card_list[i]->front;
 			backtext = card_list[i]->back;
 
@@ -126,18 +130,23 @@ void start_review_mode(void)
 				default:
 					goto get_input;
 			}
+			cardpos++;
 		}
 
 		// If the user marked all cards as right this review, review every card again
 		if (all_cards_right)
+		{
 			for (int i = 0; i < card_list_len; i++)
 				review_list[i] = true;
+		}
 
-		// Show finished review screen
+		set_numcards();
+		is_full_review = numcards == card_list_len;
+
+		// Show review finished screen
 		wclear(frontwin);
 		wclear(backwin);
 		fronttext = REVIEW_FINISH_TEXT;
-		backtext = "";
 		DRAW_FRONTWIN();
 
 		for (;;)
@@ -205,4 +214,14 @@ void prevent_small_screen(int my, int mx)
 		if (init_windows() != 0)
 			end_program(errno);
 	}
+}
+
+/*
+ * set numcards (the total number of cards being reviewed) to the amount of true values in review_list (declared in card.c)
+ */
+static void set_numcards(void)
+{
+	numcards = 0;
+	for (int i = 0; i < card_list_len; i++)
+		numcards += review_list[i];
 }
