@@ -27,6 +27,6 @@ clean:
 	rm -rf $(BUILD_DIR)
 
 run: $(BIN)
-	@$(BIN)
+	@$(BIN) data/card.txt
 
 -include $(DEPS)
