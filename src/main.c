@@ -14,7 +14,7 @@ int main(int argc, char **argv)
 	if (argc != 2)
 	{
 		endwin();
-		fprintf(stderr, "usage: sortstudy CARD_FILE\n");
+		fprintf(stderr, "usage: sortstudy-cli CARD_FILE\n");
 		exit(1);
 	}
 

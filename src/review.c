@@ -8,9 +8,10 @@
 #include "main.h"
 #include "card.h"
 #include "review_ui.h"
+#include "review_act.h"
 #include "review.h"
 
-#define	REVIEW_FINISH_TEXT	"Review Complete!\n  Press L to start the next review\n  Press S to shuffle the cards (not implemented)\n  Press F to flip the cards (not implemented)"
+#define	REVIEW_FINISH_TEXT	"Review Complete!\n  Press L to start the next review\n  Press S to shuffle the cards (not implemented)\n  Press F to flip the cards"
 #define	SMALL_WIN_TEXT		"This window is too small to run sort study"
 #define	MIN_SCREEN_H		22
 #define	MIN_SCREEN_W		24
@@ -26,6 +27,9 @@ int numcards;
 
 // True if the review covers all cards
 bool is_full_review = true;
+
+// True if the review finished screen is being shown
+bool review_finished = false;
 
 // Text containing last action made by the user to display in the info window
 char lastaction[20];
@@ -52,7 +56,7 @@ void start_review_mode(void)
 	for (;;)
 	{
 		next_review:
-		cardpos = 1;
+		cardpos = 0;
 		all_cards_right = true;
 		strncpy(lastaction, "New review started", 19);
 		for (int i = 0; i < card_list_len; i++)
@@ -62,6 +66,7 @@ void start_review_mode(void)
 				continue;
 	
 			// Update global variables used for drawing
+			cardpos++;
 			fronttext = card_list[i]->front;
 			backtext = card_list[i]->back;
 
@@ -130,7 +135,6 @@ void start_review_mode(void)
 				default:
 					goto get_input;
 			}
-			cardpos++;
 		}
 
 		// If the user marked all cards as right this review, review every card again
@@ -144,10 +148,15 @@ void start_review_mode(void)
 		is_full_review = numcards == card_list_len;
 
 		// Show review finished screen
+		review_finished = true;
+		wclear(infowin);
 		wclear(frontwin);
 		wclear(backwin);
 		fronttext = REVIEW_FINISH_TEXT;
+		draw_infowin();
 		DRAW_FRONTWIN();
+		wrefresh(infowin);
+		wrefresh(backwin);
 
 		for (;;)
 		{
@@ -155,7 +164,20 @@ void start_review_mode(void)
 			{
 				case 'l':
 				{
+					review_finished = false;
 					goto next_review;
+				}
+				case 'f':
+				{
+					flip_cards();
+					if (cards_flipped)
+						strncpy(lastaction, "Flipped cards", 14);
+					else
+						strncpy(lastaction, "Unflipped cards", 16);
+					wclear(infowin);
+					draw_infowin();
+					wrefresh(infowin);
+					break;
 				}
 				case 'q':
 				{

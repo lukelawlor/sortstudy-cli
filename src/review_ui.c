@@ -10,7 +10,6 @@
 #include "review.h"
 
 #define INFO_WIN_H		6
-#define INFO_WIN_W		20
 #define CARD_WIN_PADDING	3
 
 // Get the y position of the front or back card based on the height of the screen
@@ -43,7 +42,7 @@ int init_windows(void)
 	int mx, my;
 
 	getmaxyx(stdscr, my, mx);
-	infowin = newwin(INFO_WIN_H, INFO_WIN_W, 0, 0);
+	infowin = newwin(INFO_WIN_H, mx, 0, 0);
 
 	card_win_w = mx - CARD_WIN_PADDING * 2;
 	card_win_h = (my - INFO_WIN_H) / 2 - 2;
@@ -91,12 +90,14 @@ void draw_infowin(void)
 		wprintw(infowin, "Wrong: %d\n", wrong_cards);
 	
 	// Print the type of review and lastaction
+	wmove(infowin, 4, 0);
+	if (review_finished)
+		waddstr(infowin, "Next: ");
 	if (is_full_review)
-		mvwaddstr(infowin, 4, 0, "Full Review ");
+		waddstr(infowin, "Full Review ");
 	else
-		mvwaddstr(infowin, 4, 0, "Reviewing ");
+		waddstr(infowin, "Reviewing ");
 	wprintw(infowin, "%d cards", numcards);
-
 	mvwaddstr(infowin, 5, 0, lastaction);
 }
 
@@ -185,6 +186,7 @@ void resize_window(void)
 	mvwin(backwin, GET_BACK_WIN_Y(my), GET_CARD_WIN_X(mx));
 	wresize(frontwin, card_win_h, card_win_w);
 	wresize(backwin, card_win_h, card_win_w);
+	wresize(infowin, INFO_WIN_H, mx);
 
 	draw_infowin();
 	DRAW_FRONTWIN();
