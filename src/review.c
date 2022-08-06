@@ -32,12 +32,23 @@ bool is_full_review = true;
 bool review_finished = false;
 
 // Text containing last action made by the user to display in the info window
-char lastaction[20];
+char lastaction[21];
 
 static void set_numcards(void);
 
-void start_review_mode(void)
+void start_review_mode(bool startup_shuffle, bool startup_noborder, bool startup_flip)
 {
+	// Perform startup actions
+	if (startup_shuffle)
+		shuffle_cards();
+	
+	if (startup_noborder)
+		showborders = false;
+	
+	if (startup_flip)
+		flip_cards();
+	
+	// Check if the screen is too small
 	{
 		int my, mx;
 		getmaxyx(stdscr, my, mx);
@@ -181,8 +192,10 @@ void start_review_mode(void)
 				}
 				case 's':
 				{
-					strncpy(lastaction, "Shuffled cards", 15);
-					shuffle_cards();
+					if (shuffle_cards() == 0)
+						strncpy(lastaction, "Shuffled cards", 15);
+					else
+						strncpy(lastaction, "Shuffle calloc error", 21);
 					wclear(infowin);
 					draw_infowin();
 					wrefresh(infowin);

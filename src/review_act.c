@@ -58,25 +58,14 @@ int shuffle_cards(void)
 		old_indexes[index] = -1;
 	}
 
-	// Change the order of cards in card_list by placing cards at their corresponding index in new_indexes
-	// (e.g. card at index 0 is placed at the index of value 0 in new_indexes)
 	card_t **temp_card_list;
-
+	bool *temp_review_list;
 	if ((temp_card_list = calloc(card_list_len, sizeof(card_t *))) == NULL)
 	{
 		free(old_indexes);
 		free(new_indexes);
 		return errno;
 	}
-
-	for (int i = 0; i < card_list_len; i++)
-		temp_card_list[i] = card_list[new_indexes[i]];
-	for (int i = 0; i < card_list_len; i++)
-		card_list[i] = temp_card_list[i];
-
-	// Change the order of bools in review_list by placing bools at their corresponding index in new_indexes
-	bool *temp_review_list;
-
 	if ((temp_review_list = calloc(card_list_len, sizeof(bool))) == NULL)
 	{
 		free(old_indexes);
@@ -85,6 +74,14 @@ int shuffle_cards(void)
 		return errno;
 	}
 
+	// Change the order of cards in card_list by placing cards at their corresponding index in new_indexes
+	// (e.g. card at index 0 is placed at the index of value 0 in new_indexes)
+	for (int i = 0; i < card_list_len; i++)
+		temp_card_list[i] = card_list[new_indexes[i]];
+	for (int i = 0; i < card_list_len; i++)
+		card_list[i] = temp_card_list[i];
+
+	// Change the order of bools in review_list by placing bools at their corresponding index in new_indexes
 	for (int i = 0; i < card_list_len; i++)
 		temp_review_list[i] = review_list[new_indexes[i]];
 	for (int i = 0; i < card_list_len; i++)
