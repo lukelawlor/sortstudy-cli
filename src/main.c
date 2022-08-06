@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <time.h>
 #include <stdlib.h>
 #include <errno.h>
 
@@ -42,6 +43,9 @@ int main(int argc, char **argv)
 		perror("keypad");
 		end_program(errno);
 	}
+
+	// Set random seed
+	srand(time(NULL));
 
 	start_review_mode();
 }

@@ -11,7 +11,7 @@
 #include "review_act.h"
 #include "review.h"
 
-#define	REVIEW_FINISH_TEXT	"Review Complete!\n  Press L to start the next review\n  Press S to shuffle the cards (not implemented)\n  Press F to flip the cards"
+#define	REVIEW_FINISH_TEXT	"Review Complete!\n  Press L to start the next review\n  Press S to shuffle the cards\n  Press F to flip the cards"
 #define	SMALL_WIN_TEXT		"This window is too small to run sort study"
 #define	MIN_SCREEN_H		22
 #define	MIN_SCREEN_W		24
@@ -174,6 +174,15 @@ void start_review_mode(void)
 						strncpy(lastaction, "Flipped cards", 14);
 					else
 						strncpy(lastaction, "Unflipped cards", 16);
+					wclear(infowin);
+					draw_infowin();
+					wrefresh(infowin);
+					break;
+				}
+				case 's':
+				{
+					strncpy(lastaction, "Shuffled cards", 15);
+					shuffle_cards();
 					wclear(infowin);
 					draw_infowin();
 					wrefresh(infowin);
