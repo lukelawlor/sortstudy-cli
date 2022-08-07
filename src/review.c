@@ -61,7 +61,7 @@ void start_review_mode(bool startup_shuffle, bool startup_noborder, bool startup
 	numcards = card_list_len;
 
 	// Keeps track of whether or not the user has marked all cards right
-	bool all_cards_right = true;
+	bool all_cards_right;
 
 	// Review loop
 	for (;;)
@@ -73,7 +73,7 @@ void start_review_mode(bool startup_shuffle, bool startup_noborder, bool startup
 		for (int i = 0; i < card_list_len; i++)
 		{
 			// Don't display cards that haven't been marked for review
-			if (review_list[i] == false)
+			if (review_list[i] != DO_REVIEW)
 				continue;
 	
 			// Update global variables used for drawing
@@ -116,7 +116,7 @@ void start_review_mode(bool startup_shuffle, bool startup_noborder, bool startup
 				case 'k':
 				{
 					// Mark card as wrong
-					review_list[i] = true;
+					review_list[i] = DONT_REVIEW;
 					all_cards_right = false;
 					wrong_cards++;
 					strncpy(lastaction, "Marked card wrong", 18);
@@ -125,7 +125,7 @@ void start_review_mode(bool startup_shuffle, bool startup_noborder, bool startup
 				case 'l':
 				{
 					// Mark card as right
-					review_list[i] = false;
+					review_list[i] = DO_REVIEW;
 					right_cards++;
 					strncpy(lastaction, "Marked card right", 18);
 					break;
@@ -152,7 +152,7 @@ void start_review_mode(bool startup_shuffle, bool startup_noborder, bool startup
 		if (all_cards_right)
 		{
 			for (int i = 0; i < card_list_len; i++)
-				review_list[i] = true;
+				review_list[i] = DO_REVIEW;
 		}
 
 		set_numcards();

@@ -13,7 +13,7 @@ int card_list_len;
 
 // Array in which each index corresponds to a card in card_list;
 // A value of true indicates that the corresponding card is marked for review
-bool *review_list;
+cardstate_t *review_list;
 
 /*
  * reads a file containing card text and stores its contents into cards contained in card_list, replacing the previous contents of card_list if successful, and resizing review_list to hold the maximum amount of cards needed to review
@@ -156,17 +156,17 @@ int read_deck(char *filename)
 	temp_card_list = temp_card_ptr;
 
 	// Resize review_list 
-	bool *temp_bool_ptr;
-	if ((temp_bool_ptr = reallocarray(review_list, temp_card_list_len, sizeof(bool))) == NULL)
+	cardstate_t *temp_cardstate_ptr;
+	if ((temp_cardstate_ptr = reallocarray(review_list, temp_card_list_len, sizeof(cardstate_t))) == NULL)
 	{
 		perror("reallocarray");
 		goto read_deck_error;
 	}
-	review_list = temp_bool_ptr;
+	review_list = temp_cardstate_ptr;
 
-	// Set all elements in review_list to true
+	// Set all elements in review_list to DO_REVIEW
 	for (int i = 0; i < temp_card_list_len; i++)
-		review_list[i] = true;
+		review_list[i] = DO_REVIEW;
 
 	// Alloc new mem for card_list; if successful, free everything in card_list and its value
 	// to the new pointer

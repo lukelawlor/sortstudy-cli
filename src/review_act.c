@@ -59,14 +59,14 @@ int shuffle_cards(void)
 	}
 
 	card_t **temp_card_list;
-	bool *temp_review_list;
+	cardstate_t *temp_review_list;
 	if ((temp_card_list = calloc(card_list_len, sizeof(card_t *))) == NULL)
 	{
 		free(old_indexes);
 		free(new_indexes);
 		return errno;
 	}
-	if ((temp_review_list = calloc(card_list_len, sizeof(bool))) == NULL)
+	if ((temp_review_list = calloc(card_list_len, sizeof(cardstate_t))) == NULL)
 	{
 		free(old_indexes);
 		free(new_indexes);
