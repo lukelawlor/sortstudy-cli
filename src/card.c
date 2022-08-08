@@ -11,8 +11,12 @@
 card_t **card_list;
 int card_list_len;
 
-// Array in which each index corresponds to a card in card_list;
-// A value of true indicates that the corresponding card is marked for review
+/* This is an array holding the state
+ *
+ * 	A value of DO_REVIEW indicates that the corresponding card is marked for review
+ * 	DONT_REVIEW indicates that the card shouldn't be reviewed
+ * 	TO_DELETE marks the card for deletion
+ */
 cardstate_t *review_list;
 
 /*

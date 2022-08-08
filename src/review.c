@@ -11,7 +11,7 @@
 #include "review_act.h"
 #include "review.h"
 
-#define	REVIEW_FINISH_TEXT	"Review Complete!\n  Press L to start the next review\n  Press S to shuffle the cards\n  Press F to flip the cards"
+#define	REVIEW_FINISH_TEXT	"Review Complete!\n  Press N to start the next review\n  Press S to shuffle the cards\n  Press F to flip the cards"
 #define	SMALL_WIN_TEXT		"This window is too small to run sort study"
 #define	MIN_SCREEN_H		22
 #define	MIN_SCREEN_W		24
@@ -116,7 +116,7 @@ void start_review_mode(bool startup_shuffle, bool startup_noborder, bool startup
 				case 'k':
 				{
 					// Mark card as wrong
-					review_list[i] = DONT_REVIEW;
+					review_list[i] = DO_REVIEW;
 					all_cards_right = false;
 					wrong_cards++;
 					strncpy(lastaction, "Marked card wrong", 18);
@@ -125,7 +125,7 @@ void start_review_mode(bool startup_shuffle, bool startup_noborder, bool startup
 				case 'l':
 				{
 					// Mark card as right
-					review_list[i] = DO_REVIEW;
+					review_list[i] = DONT_REVIEW;
 					right_cards++;
 					strncpy(lastaction, "Marked card right", 18);
 					break;
@@ -173,7 +173,7 @@ void start_review_mode(bool startup_shuffle, bool startup_noborder, bool startup
 		{
 			switch (tolower(wgetch(frontwin)))
 			{
-				case 'l':
+				case 'n':
 				{
 					review_finished = false;
 					goto next_review;
@@ -261,11 +261,12 @@ void prevent_small_screen(int my, int mx)
 }
 
 /*
- * set numcards (the total number of cards being reviewed) to the amount of true values in review_list (declared in card.c)
+ * set numcards (the total number of cards being reviewed) to the amount of DO_REVIEW values in review_list (declared in card.c)
  */
 static void set_numcards(void)
 {
 	numcards = 0;
 	for (int i = 0; i < card_list_len; i++)
-		numcards += review_list[i];
+		if (review_list[i] == DO_REVIEW)
+			numcards++;
 }

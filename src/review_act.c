@@ -7,6 +7,8 @@
 
 bool cards_flipped = false;
 
+static int delete_marked_cards(void);
+
 /*
  * swaps the back text of cards with the front text
  */
@@ -92,5 +94,66 @@ int shuffle_cards(void)
 	free(temp_card_list);
 	free(new_indexes);
 	free(old_indexes);
+	return 0;
+}
+
+/*
+ * Deletes a single card at the specified index in card_list
+ *
+ * returns errno on error
+ */
+int delete_card(int index)
+{
+	review_list[index] = TO_DELETE;
+	return delete_marked_cards();
+}
+
+/*
+ * Deletes every card in card_list with a state of TO_DELETE
+ *
+ * returns errno on error
+ */
+static int delete_marked_cards(void)
+{
+	// Allocate new mem for card_list
+	card_t **new_list;
+	int new_len;
+
+	new_len = card_list_len;
+	for (int i = 0; i < card_list_len; i++)
+		if (review_list[i] == TO_DELETE)
+			new_len--;
+	
+	if ((new_list = calloc(new_len, sizeof(card_t *))) == NULL)
+		return errno;
+	
+	// Free memory of delete cards and set their indexes in card_list to NULL
+	for (int i = 0; i < card_list_len; i++)
+	{
+		if (review_list[i] == TO_DELETE)
+		{
+			free(card_list[i]->back);
+			free(card_list[i]->front);
+			free(card_list[i]);
+			card_list[i] = NULL;
+		}
+	}
+	
+	// Add cards from card_list to new_list
+	
+	// Position in new_list
+	int np;
+
+	np = 0;
+	for (int i = 0; i < card_list_len; i++)
+	{
+		if (card_list[i] != NULL)
+			new_list[np++] = card_list[i];
+	}
+
+	// Free data left in card_list and set it to new_list
+	free(card_list);
+	card_list = new_list;
+
 	return 0;
 }
