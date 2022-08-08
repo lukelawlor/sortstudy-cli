@@ -38,6 +38,7 @@ bool review_finished = false;
 char lastaction[23];
 
 static void set_numcards(void);
+static void toggle_borders(void);
 
 void start_review_mode(bool startup_shuffle, bool startup_noborder, bool startup_flip)
 {
@@ -103,7 +104,6 @@ void start_review_mode(bool startup_shuffle, bool startup_noborder, bool startup
 			switch (tolower(wgetch(frontwin)))
 			{
 				case 'j':
-				{
 					// Toggle back of card visibility
 					if ((showback = showback ? false : true) == true)
 						DRAW_BACKWIN();
@@ -111,26 +111,20 @@ void start_review_mode(bool startup_shuffle, bool startup_noborder, bool startup
 						wclear(backwin);
 					wrefresh(backwin);
 					goto get_input;
-				}
 				case 'k':
-				{
 					// Mark card as wrong
 					review_list[cardpos] = DO_REVIEW;
 					all_cards_right = false;
 					wrong_cards++;
 					strncpy(lastaction, "Marked card wrong", 18);
 					break;
-				}
 				case 'l':
-				{
 					// Mark card as right
 					review_list[cardpos] = DONT_REVIEW;
 					right_cards++;
 					strncpy(lastaction, "Marked card right", 18);
 					break;
-				}
 				case 'd':
-				{
 					// Delete card
 					if (card_list_len == 1)
 					{
@@ -157,30 +151,14 @@ void start_review_mode(bool startup_shuffle, bool startup_noborder, bool startup
 						goto get_input;
 					}
 					break;
-				}
 				case 'b':
-				{
-					showborders = showborders ? false : true;
-					wclear(frontwin);
-					DRAW_FRONTWIN();
-					wrefresh(frontwin);
-					if (showback)
-					{
-						wclear(backwin);
-						DRAW_BACKWIN();
-						wrefresh(backwin);
-					}
+					toggle_borders();
 					goto get_input;
-				}
 				case KEY_RESIZE:
-				{
 					resize_window();
 					goto get_input;
-				}
 				case 'q':
-				{
 					end_program(0);
-				}
 				default:
 					goto get_input;
 			}
@@ -212,12 +190,9 @@ void start_review_mode(bool startup_shuffle, bool startup_noborder, bool startup
 			switch (tolower(wgetch(frontwin)))
 			{
 				case 'n':
-				{
 					review_finished = false;
 					goto next_review;
-				}
 				case 'f':
-				{
 					flip_cards();
 					if (cards_flipped)
 						strncpy(lastaction, "Flipped cards", 14);
@@ -225,29 +200,21 @@ void start_review_mode(bool startup_shuffle, bool startup_noborder, bool startup
 						strncpy(lastaction, "Unflipped cards", 16);
 					REDRAW_INFOWIN();
 					break;
-				}
 				case 's':
-				{
 					if (shuffle_cards() == 0)
 						strncpy(lastaction, "Shuffled cards", 15);
 					else
 						strncpy(lastaction, "Shuffle calloc error", 21);
 					REDRAW_INFOWIN();
 					break;
-				}
 				case 'q':
-				{
 					end_program(0);
-				}
-				case 'b':	// fall through
-				{
-					showborders = showborders ? false : true;
-				}
+				case 'b':
+					toggle_borders();
+					break;
 				case KEY_RESIZE:
-				{
 					resize_window();
 					break;
-				}
 			}
 		}
 	}
@@ -303,4 +270,18 @@ static void set_numcards(void)
 	for (int i = 0; i < card_list_len; i++)
 		if (review_list[i] == DO_REVIEW)
 			numcards++;
+}
+
+static void toggle_borders(void)
+{
+	showborders = showborders ? false : true;
+	wclear(frontwin);
+	DRAW_FRONTWIN();
+	wrefresh(frontwin);
+	if (showback)
+	{
+		wclear(backwin);
+		DRAW_BACKWIN();
+		wrefresh(backwin);
+	}
 }
