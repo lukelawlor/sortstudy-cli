@@ -15,6 +15,9 @@
 #define	SMALL_WIN_TEXT		"This window is too small to run sort study"
 #define	MIN_SCREEN_H		22
 #define	MIN_SCREEN_W		24
+#define	REDRAW_INFOWIN()	wclear(infowin);\
+				draw_infowin();\
+				wrefresh(infowin)
 
 // No. of cards marked right or wrong
 int right_cards, wrong_cards;
@@ -32,7 +35,7 @@ bool is_full_review = true;
 bool review_finished = false;
 
 // Text containing last action made by the user to display in the info window
-char lastaction[21];
+char lastaction[23];
 
 static void set_numcards(void);
 
@@ -67,19 +70,17 @@ void start_review_mode(bool startup_shuffle, bool startup_noborder, bool startup
 	for (;;)
 	{
 		next_review:
-		cardpos = 0;
 		all_cards_right = true;
 		strncpy(lastaction, "New review started", 19);
-		for (int i = 0; i < card_list_len; i++)
+		for (cardpos = 0; cardpos < card_list_len; cardpos++)
 		{
 			// Don't display cards that haven't been marked for review
-			if (review_list[i] != DO_REVIEW)
+			if (review_list[cardpos] != DO_REVIEW)
 				continue;
 	
 			// Update global variables used for drawing
-			cardpos++;
-			fronttext = card_list[i]->front;
-			backtext = card_list[i]->back;
+			fronttext = card_list[cardpos]->front;
+			backtext = card_list[cardpos]->back;
 
 			// Hide the back of the card when a new card is shown
 			showback = false;
@@ -96,9 +97,7 @@ void start_review_mode(bool startup_shuffle, bool startup_noborder, bool startup
 			wrefresh(frontwin);
 
 			// Display misc info
-			wclear(infowin);
-			draw_infowin();
-			wrefresh(infowin);
+			REDRAW_INFOWIN();
 
 			get_input:
 			switch (tolower(wgetch(frontwin)))
@@ -116,7 +115,7 @@ void start_review_mode(bool startup_shuffle, bool startup_noborder, bool startup
 				case 'k':
 				{
 					// Mark card as wrong
-					review_list[i] = DO_REVIEW;
+					review_list[cardpos] = DO_REVIEW;
 					all_cards_right = false;
 					wrong_cards++;
 					strncpy(lastaction, "Marked card wrong", 18);
@@ -125,14 +124,53 @@ void start_review_mode(bool startup_shuffle, bool startup_noborder, bool startup
 				case 'l':
 				{
 					// Mark card as right
-					review_list[i] = DONT_REVIEW;
+					review_list[cardpos] = DONT_REVIEW;
 					right_cards++;
 					strncpy(lastaction, "Marked card right", 18);
 					break;
 				}
-				case 'b':	// fall through
+				case 'd':
+				{
+					// Delete card
+					if (card_list_len == 1)
+					{
+						strncpy(lastaction, "Can't delete last card", 23);
+						REDRAW_INFOWIN();
+						goto get_input;
+					}
+
+					review_list[cardpos] = TO_DELETE;
+					if (delete_marked_cards() == 0)
+					{
+						// Delete successful, decrement cardpos to not skip over the next card
+						strncpy(lastaction, "Deleted card", 13);
+						numcards--;
+
+						cardpos--;
+					}
+					else
+					{
+						// Delete unsuccessful
+						strncpy(lastaction, "Delete error", 13);
+						review_list[cardpos] = DO_REVIEW;
+						REDRAW_INFOWIN();
+						goto get_input;
+					}
+					break;
+				}
+				case 'b':
 				{
 					showborders = showborders ? false : true;
+					wclear(frontwin);
+					DRAW_FRONTWIN();
+					wrefresh(frontwin);
+					if (showback)
+					{
+						wclear(backwin);
+						DRAW_BACKWIN();
+						wrefresh(backwin);
+					}
+					goto get_input;
 				}
 				case KEY_RESIZE:
 				{
@@ -147,6 +185,7 @@ void start_review_mode(bool startup_shuffle, bool startup_noborder, bool startup
 					goto get_input;
 			}
 		}
+		cardpos--;
 
 		// If the user marked all cards as right this review, review every card again
 		if (all_cards_right)
@@ -154,19 +193,18 @@ void start_review_mode(bool startup_shuffle, bool startup_noborder, bool startup
 			for (int i = 0; i < card_list_len; i++)
 				review_list[i] = DO_REVIEW;
 		}
-
 		set_numcards();
 		is_full_review = numcards == card_list_len;
 
 		// Show review finished screen
 		review_finished = true;
-		wclear(infowin);
-		wclear(frontwin);
-		wclear(backwin);
 		fronttext = REVIEW_FINISH_TEXT;
-		draw_infowin();
+
+		REDRAW_INFOWIN();
+		wclear(frontwin);
 		DRAW_FRONTWIN();
 		wrefresh(infowin);
+		wclear(backwin);
 		wrefresh(backwin);
 
 		for (;;)
@@ -185,9 +223,7 @@ void start_review_mode(bool startup_shuffle, bool startup_noborder, bool startup
 						strncpy(lastaction, "Flipped cards", 14);
 					else
 						strncpy(lastaction, "Unflipped cards", 16);
-					wclear(infowin);
-					draw_infowin();
-					wrefresh(infowin);
+					REDRAW_INFOWIN();
 					break;
 				}
 				case 's':
@@ -196,9 +232,7 @@ void start_review_mode(bool startup_shuffle, bool startup_noborder, bool startup
 						strncpy(lastaction, "Shuffled cards", 15);
 					else
 						strncpy(lastaction, "Shuffle calloc error", 21);
-					wclear(infowin);
-					draw_infowin();
-					wrefresh(infowin);
+					REDRAW_INFOWIN();
 					break;
 				}
 				case 'q':

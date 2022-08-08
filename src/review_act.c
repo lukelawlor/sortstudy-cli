@@ -7,8 +7,6 @@
 
 bool cards_flipped = false;
 
-static int delete_marked_cards(void);
-
 /*
  * swaps the back text of cards with the front text
  */
@@ -98,25 +96,15 @@ int shuffle_cards(void)
 }
 
 /*
- * Deletes a single card at the specified index in card_list
- *
- * returns errno on error
- */
-int delete_card(int index)
-{
-	review_list[index] = TO_DELETE;
-	return delete_marked_cards();
-}
-
-/*
  * Deletes every card in card_list with a state of TO_DELETE
  *
  * returns errno on error
  */
-static int delete_marked_cards(void)
+int delete_marked_cards(void)
 {
-	// Allocate new mem for card_list
-	card_t **new_list;
+	// Allocate new mem for card_list and review_list
+	card_t **new_card_list;
+	cardstate_t *new_review_list;
 	int new_len;
 
 	new_len = card_list_len;
@@ -124,10 +112,16 @@ static int delete_marked_cards(void)
 		if (review_list[i] == TO_DELETE)
 			new_len--;
 	
-	if ((new_list = calloc(new_len, sizeof(card_t *))) == NULL)
+	if ((new_card_list = calloc(new_len, sizeof(card_t *))) == NULL)
 		return errno;
 	
-	// Free memory of delete cards and set their indexes in card_list to NULL
+	if ((new_review_list = calloc(new_len, sizeof(cardstate_t))) == NULL)
+	{
+		free(new_card_list);
+		return errno;
+	}
+	
+	// Free mem of deleted cards and set their indexes in card_list to NULL
 	for (int i = 0; i < card_list_len; i++)
 	{
 		if (review_list[i] == TO_DELETE)
@@ -139,21 +133,27 @@ static int delete_marked_cards(void)
 		}
 	}
 	
-	// Add cards from card_list to new_list
+	// Add cards from card_list to new_card_list
 	
-	// Position in new_list
+	// Position in new_card_list and new_review_list
 	int np;
 
 	np = 0;
 	for (int i = 0; i < card_list_len; i++)
 	{
 		if (card_list[i] != NULL)
-			new_list[np++] = card_list[i];
+		{
+			new_card_list[np] = card_list[i];
+			new_review_list[np++] = review_list[i];
+		}
 	}
 
-	// Free data left in card_list and set it to new_list
+	// Free data left in card_list and review_list and set them to their new counterparts
 	free(card_list);
-	card_list = new_list;
+	free(review_list);
+	card_list = new_card_list;
+	review_list = new_review_list;
+	card_list_len = new_len;
 
 	return 0;
 }

@@ -73,7 +73,7 @@ void draw_infowin(void)
 	if (cardpos > MAX_INFO_CARDS)
 		waddstr(infowin, "Card " STR(MAX_INFO_CARDS) "+/");
 	else
-		wprintw(infowin, "Card %d/", cardpos);
+		wprintw(infowin, "Card %d/", cardpos + 1);
 	if (numcards > MAX_INFO_CARDS)
 		waddstr(infowin, STR(MAX_INFO_CARDS) "+\n");
 	else
