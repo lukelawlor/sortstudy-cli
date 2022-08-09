@@ -12,5 +12,5 @@ typedef short cardstate_t;
 extern card_t **card_list;
 extern int card_list_len;
 extern cardstate_t *review_list;
-int read_deck(char *);
+int read_deck(char **, int);
 void free_card_list(card_t **, int);

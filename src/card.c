@@ -24,7 +24,7 @@ cardstate_t *review_list;
  *
  * returns errno on file or memory allocation errors
  */
-int read_deck(char *filename)
+int read_deck(char **filenames, int filecount)
 {
 	// Temp array used to store card data before it's transferred to card_list
 	// temp_card_list_len 	refers to the number of cards in the array
@@ -51,102 +51,107 @@ int read_deck(char *filename)
 	front = true;
 	temp_card_list_len = bp = 0;
 
-	// Open card file
+	// Open card files and read them
 	FILE *cardfile;
-	if ((cardfile = fopen(filename, "r")) == NULL)
-	{
-		perror("fopen");
-		return errno;
-	}
 
-	// Read the card file
-	do
+	for (int filenum = 0; filenum < filecount; filenum++)
 	{
-		if ((c = fgetc(cardfile)) == '\n' || bp == MAX_LINE_CHARS - 1)
+		if ((cardfile = fopen(filenames[filenum], "r")) == NULL)
 		{
-			// Null-terminate the buffer so it can safely be copied into strings
-			buffer[bp++] = '\0';
+			perror("fopen");
+			return errno;
+		}
 
-			// Check if the front or back of the card is being read
-			if (front)
+		while ((c = fgetc(cardfile)) != EOF)
+		{
+			if (c == '\n' || bp == MAX_LINE_CHARS - 1)
 			{
-				// Allocate mem for a new card + its front string
-				if ((card = malloc(sizeof(card_t))) == NULL)
-				{
-					perror("malloc");
-					goto read_deck_error;
-				}
-				if ((card->front = calloc(bp, sizeof(char))) == NULL)
-				{
-					perror("calloc");
-					free(card);
-					goto read_deck_error;
-				}
+				// Null-terminate the buffer so it can safely be copied into strings
+				buffer[bp++] = '\0';
 
-				// Copy buffer into the front string of the card
-				strncpy(card->front, buffer, bp);
-			}
-			else
-			{
-				// Allocate mem for the back string of the card
-				if ((card->back = calloc(bp, sizeof(char))) == NULL)
+				// Check if the front or back of the card is being read
+				if (front)
 				{
-					perror("calloc");
-					free(card->front);
-					free(card);
-					goto read_deck_error;
-				}
-				
-				// Copy buffer into the back text of the card
-				strncpy(card->back, buffer, bp);
-
-				// Store a pointer to the card in the list if there's enough space in the array,
-				// if not, resize the array
-				if (temp_card_list_len == temp_card_list_size)
-				{
-					temp_card_list_size += CARD_ARRAY_ESTSIZE;
-					if ((temp_card_ptr = reallocarray(temp_card_list, temp_card_list_size, sizeof(card_t *))) == NULL)
+					// Allocate mem for a new card + its front string
+					if ((card = malloc(sizeof(card_t))) == NULL)
 					{
-						perror("reallocarray");
-						free(card->back);
+						perror("malloc");
+						goto read_deck_error;
+					}
+					if ((card->front = calloc(bp, sizeof(char))) == NULL)
+					{
+						perror("calloc");
+						free(card);
+						goto read_deck_error;
+					}
+
+					// Copy buffer into the front string of the card
+					strncpy(card->front, buffer, bp);
+				}
+				else
+				{
+					// Allocate mem for the back string of the card
+					if ((card->back = calloc(bp, sizeof(char))) == NULL)
+					{
+						perror("calloc");
 						free(card->front);
 						free(card);
 						goto read_deck_error;
 					}
-					temp_card_list = temp_card_ptr;
+					
+					// Copy buffer into the back text of the card
+					strncpy(card->back, buffer, bp);
+
+					// Store a pointer to the card in the list if there's enough space in the array,
+					// if not, resize the array
+					if (temp_card_list_len == temp_card_list_size)
+					{
+						temp_card_list_size += CARD_ARRAY_ESTSIZE;
+						if ((temp_card_ptr = reallocarray(temp_card_list, temp_card_list_size, sizeof(card_t *))) == NULL)
+						{
+							perror("reallocarray");
+							free(card->back);
+							free(card->front);
+							free(card);
+							goto read_deck_error;
+						}
+						temp_card_list = temp_card_ptr;
+					}
+					temp_card_list[temp_card_list_len++] = card;
+					card = NULL;
 				}
-				temp_card_list[temp_card_list_len++] = card;
-				card = NULL;
+
+				// Invert the value of front and reset the buffer position
+				front = front ? false : true;
+				bp = 0;
 			}
+			else	// Collect characters in buffer
+				buffer[bp++] = c;
 
-			// Invert the value of front and reset the buffer position
-			front = front ? false : true;
-			bp = 0;
 		}
-		else	// Collect characters in buffer
-			buffer[bp++] = c;
-	} while (c != EOF);
 
-	if (fclose(cardfile) == EOF)
-	{
-		perror("fclose");
-		goto read_deck_error;
+		if (fclose(cardfile) == EOF)
+		{
+			perror("fclose");
+			goto read_deck_error;
+		}
+
+		// Handle reading errors
+		if (card != NULL)
+		{
+			// A card's front has been read, but not its back
+			fprintf(stderr, "sortstudy-cli: no back text found for a card in file \"%s\"\n", filenames[filenum]);
+			free(card->front);
+			free(card);
+			errno = EIO;
+			goto read_deck_error;
+		}
 	}
 
-	// Handle reading errors
-	if (card != NULL)
-	{
-		// A card's front has been read, but not its back
-		fprintf(stderr, "sortstudy-cli: no back text found for a card");
-		free(card->front);
-		free(card);
-		errno = EIO;
-		goto read_deck_error;
-	}
 	if (temp_card_list_len == 0)
 	{
 		// No cards were fully read
-		fprintf(stderr, "sortstudy-cli: no cards found in file");
+		fprintf(stderr, "sortstudy-cli: no cards found in file(s)\n");
 		free(temp_card_list);
 		return EIO;
 	}
