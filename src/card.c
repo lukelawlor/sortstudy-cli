@@ -215,3 +215,66 @@ void free_card_list(card_t **list, int len)
 	}
 	free(list);
 }
+
+/*
+ * Deletes every card in card_list with a state of TO_DELETE
+ *
+ * returns errno on error
+ */
+int delete_marked_cards(void)
+{
+	// Allocate new mem for card_list and review_list
+	card_t **new_card_list;
+	cardstate_t *new_review_list;
+	int new_len;
+
+	new_len = card_list_len;
+	for (int i = 0; i < card_list_len; i++)
+		if (review_list[i] == TO_DELETE)
+			new_len--;
+	
+	if ((new_card_list = calloc(new_len, sizeof(card_t *))) == NULL)
+		return errno;
+	
+	if ((new_review_list = calloc(new_len, sizeof(cardstate_t))) == NULL)
+	{
+		free(new_card_list);
+		return errno;
+	}
+	
+	// Free mem of deleted cards and set their indexes in card_list to NULL
+	for (int i = 0; i < card_list_len; i++)
+	{
+		if (review_list[i] == TO_DELETE)
+		{
+			free(card_list[i]->back);
+			free(card_list[i]->front);
+			free(card_list[i]);
+			card_list[i] = NULL;
+		}
+	}
+	
+	// Add cards from card_list to new_card_list
+	
+	// Position in new_card_list and new_review_list
+	int np;
+
+	np = 0;
+	for (int i = 0; i < card_list_len; i++)
+	{
+		if (card_list[i] != NULL)
+		{
+			new_card_list[np] = card_list[i];
+			new_review_list[np++] = review_list[i];
+		}
+	}
+
+	// Free data left in card_list and review_list and set them to their new counterparts
+	free(card_list);
+	free(review_list);
+	card_list = new_card_list;
+	review_list = new_review_list;
+	card_list_len = new_len;
+
+	return 0;
+}

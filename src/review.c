@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdlib.h>
 #include <errno.h>
 
 #include <ncurses.h>
@@ -60,7 +61,11 @@ void start_review_mode(bool startup_shuffle, bool startup_noborder, bool startup
 	}
 
 	if (init_windows() != 0)
-		end_program(errno);
+	{
+		endwin();
+		fprintf(stderr, "sortstudy-cli: windows failed to initialize");
+		exit(EXIT_FAILURE);
+	}
 
 	numcards = card_list_len;
 
@@ -158,7 +163,7 @@ void start_review_mode(bool startup_shuffle, bool startup_noborder, bool startup
 					resize_window();
 					goto get_input;
 				case 'q':
-					end_program(0);
+					end_program(EXIT_SUCCESS);
 				default:
 					goto get_input;
 			}
@@ -208,7 +213,7 @@ void start_review_mode(bool startup_shuffle, bool startup_noborder, bool startup
 					REDRAW_INFOWIN();
 					break;
 				case 'q':
-					end_program(0);
+					end_program(EXIT_SUCCESS);
 				case 'b':
 					toggle_borders();
 					break;
@@ -248,7 +253,7 @@ void prevent_small_screen(int my, int mx)
 			if ((c = wgetch(stdscr)) == KEY_RESIZE)
 				getmaxyx(stdscr, my, mx);
 			else if (c == 'q')
-				end_program(0);
+				end_program(EXIT_SUCCESS);
 		}
 		while (my < MIN_SCREEN_H || mx < MIN_SCREEN_W);
 
@@ -257,7 +262,11 @@ void prevent_small_screen(int my, int mx)
 		wrefresh(stdscr);
 
 		if (init_windows() != 0)
-			end_program(errno);
+		{
+			endwin();
+			fprintf(stderr, "sortstudy-cli: windows failed to initialize");
+			exit(EXIT_FAILURE);
+		}
 	}
 }
 
