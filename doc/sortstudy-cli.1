@@ -1,0 +1,76 @@
+.TH SORTSTUDY-CLI 1  2022-08-09
+
+.SH NAME
+sortstudy\-cli \- simple index card studying tool
+
+.SH SYNOPSIS
+.B sortstudy\-cli
+\fBcardfile\fR
+[\fBcardfile2 ...\fR]
+[\fB\-h\fR]
+[\fB\-s\fR]
+[\fB\-b\fR]
+[\fB\-f\fR]
+
+.SH DESCRIPTION
+.B sortstudy\-cli
+is an ncurses interface for efficiently studying index cards.
+.P
+Decks of index cards are contained in card files. These are text files in which the first line contains the front text of the first card, the next line contains the back text of the first card, the next line contains the front text of the next card, and so forth. Card files are formatted this way so they can be typed easily.
+.P
+When provided with one or more card files, Sort Study will enter review mode. This will present the user with the front text of the first card. Pressing J will show the back text of the card. If the user has correctly guessed the back of the card, they can press L to mark the card as "right." Otherwise, pressing K will mark the card as "wrong," setting it aside for future review. After a card is marked, the next card will be shown, until all cards have been marked.
+.P
+The next set of cards to be reviewed will contain all of the cards previously marked as wrong, and the review following that will contain all of the cards that have still been marked as wrong. Once all cards have eventually been marked as right, the entire deck will be reviewed again.
+.P
+This automated reviewing process allows users to spend the most time studying difficult cards, increasing time efficiency.
+.P
+To modify card decks on the fly, Sort Study allows users to shuffle, flip, and delete sets of cards within review mode. See the CONTROLS section for the full list of review mode controls.
+
+.SH OPTIONS
+.TP
+.BR \-h
+show help text
+.TP
+.BR \-s
+shuffle cards at startup
+.TP
+.BR \-b
+disable the drawing of card borders at startup
+.TP
+.BR \-f
+flip cards (swaps front and back text) at startup
+
+.SH CONTROLS
+.TP
+.BR J
+toggle the visibility of the back of a card
+.TP
+.BR K
+mark a card as wrong
+.TP
+.BR L
+mark a card as right
+.TP
+.BR D
+delete card (so it isn't reviewed again)
+.TP
+.BR B
+toggle the drawing of card borders
+.TP
+.BR Q
+quit
+.TP
+.BR N
+start the next review (available when a review is finished)
+.TP
+.BR F
+flip all cards (swap the front and back text, available when a review is finished)
+.TP
+.BR S
+shuffle cards (available when a review is finished)
+
+.SH AUTHOR
+Luke Lawlor <lklawlor1@gmail.com>
+
+.SH SEE ALSO
+\fBsortstudy-cli-controls\fR(7)

@@ -117,5 +117,5 @@ void end_program(int exitcode)
 
 static void print_help(void)
 {
-	printf("Sort Study CLI, version %s\nusage: sortstudy-cli [card file(s)] [options]\noptions:\n\t-s\tshuffle cards at start\n\t-b\tdisable card borders at start\n\t-f\tflip cards at start\n\t-h\tdisplay this help text\nbasic review mode controls:\n\tJ\tflip card\n\tK\tmark card as wrong\n\tL\tmark card as right\n\tD\tdelete card\n\tB\ttoggle card borders\n\tQ\tquit\n\nSort Study CLI home page: <https://github.com/lukelawlor/sortstudy-cli>\n", VERSION);
+	printf("Sort Study CLI, version %s\nusage: sortstudy-cli cardfile [cardfile2 ...] [options]\noptions:\n\t-s\tshuffle cards at start\n\t-b\tdisable card borders at start\n\t-f\tflip cards at start\n\t-h\tdisplay this help text\nbasic review mode controls:\n\tJ\tflip card\n\tK\tmark card as wrong\n\tL\tmark card as right\n\tD\tdelete card\n\tB\ttoggle card borders\n\tQ\tquit\n\nSort Study CLI home page: <https://github.com/lukelawlor/sortstudy-cli>\n", VERSION);
 }
