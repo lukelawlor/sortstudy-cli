@@ -12,10 +12,15 @@
 #include "review_act.h"
 #include "review.h"
 
+// Text
 #define	REVIEW_FINISH_TEXT	"Review Complete!\n  Press N to start the next review\n  Press S to shuffle the cards\n  Press F to flip the cards"
 #define	SMALL_WIN_TEXT		"This window is too small to run sort study"
-#define	MIN_SCREEN_H		22
-#define	MIN_SCREEN_W		24
+
+// Minimum screen dimensions
+#define	MIN_SCREEN_H		18
+#define	MIN_SCREEN_W		35
+
+// Macro to completely redraw the info window
 #define	REDRAW_INFOWIN()	wclear(infowin);\
 				draw_infowin();\
 				wrefresh(infowin)
@@ -81,15 +86,17 @@ void start_review_mode(bool startup_shuffle, bool startup_noborder, bool startup
 		next_review:
 		all_cards_right = true;
 		strncpy(lastaction, "New review started", 19);
-		for (cardpos = 0; cardpos < card_list_len; cardpos++)
+		cardpos = 0;
+		for (int i = 0; i < card_list_len; i++)
 		{
 			// Don't display cards that haven't been marked for review
-			if (review_list[cardpos] != DO_REVIEW)
+			if (review_list[i] != DO_REVIEW)
 				continue;
 	
 			// Update global variables used for drawing
-			fronttext = card_list[cardpos]->front;
-			backtext = card_list[cardpos]->back;
+			cardpos++;
+			fronttext = card_list[i]->front;
+			backtext = card_list[i]->back;
 
 			// Hide the back of the card when a new card is shown
 			showback = false;
@@ -121,14 +128,14 @@ void start_review_mode(bool startup_shuffle, bool startup_noborder, bool startup
 					goto get_input;
 				case 'k':
 					// Mark card as wrong
-					review_list[cardpos] = DO_REVIEW;
+					review_list[i] = DO_REVIEW;
 					all_cards_right = false;
 					wrong_cards++;
 					strncpy(lastaction, "Marked card wrong", 18);
 					break;
 				case 'l':
 					// Mark card as right
-					review_list[cardpos] = DONT_REVIEW;
+					review_list[i] = DONT_REVIEW;
 					right_cards++;
 					strncpy(lastaction, "Marked card right", 18);
 					break;
@@ -141,20 +148,25 @@ void start_review_mode(bool startup_shuffle, bool startup_noborder, bool startup
 						goto get_input;
 					}
 
-					review_list[cardpos] = TO_DELETE;
+					review_list[i] = TO_DELETE;
 					if (delete_marked_cards() == 0)
 					{
 						// Delete successful, decrement cardpos to not skip over the next card
 						strncpy(lastaction, "Deleted card", 13);
+
+						// Update global variables for drawing
 						numcards--;
 
 						cardpos--;
+
+						// Decrement i so the next card isn't skipped over
+						i--;
 					}
 					else
 					{
 						// Delete unsuccessful
 						strncpy(lastaction, "Delete error", 13);
-						review_list[cardpos] = DO_REVIEW;
+						review_list[i] = DO_REVIEW;
 						REDRAW_INFOWIN();
 						goto get_input;
 					}
@@ -171,20 +183,21 @@ void start_review_mode(bool startup_shuffle, bool startup_noborder, bool startup
 					goto get_input;
 			}
 		}
-		cardpos--;
 
 		// If the user marked all cards as right this review, review every card again
 		if (all_cards_right)
-		{
 			for (int i = 0; i < card_list_len; i++)
 				review_list[i] = DO_REVIEW;
-		}
+
+		// Update global variables for drawing
+		cardpos = 0;
+		showback = false;
+		review_finished = true;
+		fronttext = REVIEW_FINISH_TEXT;
 		set_numcards();
 		is_full_review = numcards == card_list_len;
 
 		// Show review finished screen
-		review_finished = true;
-		fronttext = REVIEW_FINISH_TEXT;
 
 		REDRAW_INFOWIN();
 		wclear(frontwin);

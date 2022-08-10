@@ -10,10 +10,13 @@
 #include "review.h"
 
 // The width of the info window
-#define INFO_WIN_H		6
+#define INFO_WIN_H		3
+
+// The minimum x position of centered info text
+#define	MIN_INFO_CENTER_X	14
 
 // The distance between the edges of the screen and the horizontal sides of the card windows
-#define CARD_WIN_PADDING	3
+#define CARD_WIN_PADDING	2
 
 // Get the y position of the front or back card based on the height of the screen
 #define	GET_FRONT_WIN_Y(my)	(my - INFO_WIN_H) / 2 - 1 - card_win_h + INFO_WIN_H
@@ -76,7 +79,7 @@ void draw_infowin(void)
 	if (cardpos > MAX_INFO_CARDS)
 		waddstr(infowin, "Card " STR(MAX_INFO_CARDS) "+/");
 	else
-		wprintw(infowin, "Card %d/", cardpos + 1);
+		wprintw(infowin, "Card %d/", cardpos);
 	if (numcards > MAX_INFO_CARDS)
 		waddstr(infowin, STR(MAX_INFO_CARDS) "+\n");
 	else
@@ -93,7 +96,35 @@ void draw_infowin(void)
 		wprintw(infowin, "Wrong: %d\n", wrong_cards);
 	
 	// Print the type of review and lastaction
-	wmove(infowin, 4, 0);
+
+	// Amount of characters to print for review type and lastaction text
+	int review_chars = 6 + get_digits(numcards);
+	int last_chars = strlen(lastaction);
+
+	if (review_finished)
+		review_chars += 6;
+	if (is_full_review)
+		review_chars += 12;
+	else
+		review_chars += 10;
+
+	// Text-positioning variables
+
+	// Width of the screen
+	int screen_width = getmaxx(stdscr);
+
+	// Width of half the entire text
+	int half_text_width = MAX(review_chars, last_chars) / 2;
+
+	// The x position to print centered text around
+	int midx = (screen_width / 2);
+
+	// Adjust midx when the centered text is close to the left side of the screen
+	if (midx - half_text_width <= MIN_INFO_CENTER_X)
+		midx = MIN_INFO_CENTER_X + half_text_width;
+
+	// Printing review type
+	wmove(infowin, 0, midx - (review_chars / 2));
 	if (review_finished)
 		waddstr(infowin, "Next: ");
 	if (is_full_review)
@@ -101,7 +132,10 @@ void draw_infowin(void)
 	else
 		waddstr(infowin, "Reviewing ");
 	wprintw(infowin, "%d cards", numcards);
-	mvwaddstr(infowin, 5, 0, lastaction);
+
+	// Printing lastaction
+	wmove(infowin, 2, midx - (last_chars / 2));
+	waddstr(infowin, lastaction);
 }
 
 /*
