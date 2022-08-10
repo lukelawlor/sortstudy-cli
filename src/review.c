@@ -38,7 +38,10 @@ bool review_finished = false;
 // Text containing last action made by the user to display in the info window
 char lastaction[23];
 
+// Sets numcards based on the amount of cards with the DO_REVIEW state
 static void set_numcards(void);
+
+// Toggles the drawing of borders of cards
 static void toggle_borders(void);
 
 void start_review_mode(bool startup_shuffle, bool startup_noborder, bool startup_flip)
@@ -281,6 +284,9 @@ static void set_numcards(void)
 			numcards++;
 }
 
+/*
+ * toggles the drawing of borders around card windows
+ */
 static void toggle_borders(void)
 {
 	showborders = showborders ? false : true;

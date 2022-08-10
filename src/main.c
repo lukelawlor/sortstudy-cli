@@ -12,6 +12,7 @@
 #define	VERSION	"1.0.0"
 #define	PRINT_ERROR(x)	fprintf(stderr, x)
 
+// Print the text output when -h is passed
 static void print_help(void);
 
 int main(int argc, char **argv)
@@ -109,12 +110,14 @@ int main(int argc, char **argv)
 	start_review_mode(startup_shuffle, startup_noborder, startup_flip);
 }
 
+// Calls endwin and then exits the program
 void end_program(int exitcode)
 {
 	endwin();
 	exit(exitcode);
 }
 
+// Print the text output when -h is passed
 static void print_help(void)
 {
 	printf("Sort Study CLI, version %s\nusage: sortstudy-cli cardfile [cardfile2 ...] [options]\noptions:\n\t-s\tshuffle cards at start\n\t-b\tdisable card borders at start\n\t-f\tflip cards at start\n\t-h\tdisplay this help text\nbasic review mode controls:\n\tJ\tflip card\n\tK\tmark card as wrong\n\tL\tmark card as right\n\tD\tdelete card\n\tB\ttoggle card borders\n\tQ\tquit\n\nSort Study CLI home page: <https://github.com/lukelawlor/sortstudy-cli>\n", VERSION);

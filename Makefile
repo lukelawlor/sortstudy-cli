@@ -6,7 +6,7 @@ OBJS := $(SRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
 DEPS := $(OBJS:.o=.d)
 
 CC := gcc
-CFLAGS := -g -Wall
+CFLAGS := -Wall -O2
 DEPFLAGS := -MMD -MP
 LDFLAGS := -lncurses
 

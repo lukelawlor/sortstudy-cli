@@ -9,7 +9,10 @@
 #include "review_ui.h"
 #include "review.h"
 
+// The width of the info window
 #define INFO_WIN_H		6
+
+// The distance between the edges of the screen and the horizontal sides of the card windows
 #define CARD_WIN_PADDING	3
 
 // Get the y position of the front or back card based on the height of the screen
