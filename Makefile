@@ -10,7 +10,7 @@ CFLAGS := -Wall
 DEPFLAGS := -MMD -MP
 LDFLAGS := -lncurses
 
-BINNAME := sortstudy-cli
+BINNAME := sortstudycli
 BINPATH := $(BUILD_DIR)/$(BINNAME)
 
 all: $(BINPATH)
@@ -29,11 +29,11 @@ clean:
 
 install:
 	cp -f $(BINPATH) /usr/local/bin/$(BINNAME)
-	cp -f doc/sortstudy-cli.1 /usr/local/share/man/man1/
-	chmod 644 /usr/local/share/man/man1/sortstudy-cli.1
+	cp -f doc/sortstudycli.1 /usr/local/share/man/man1/sortstudycli.1
+	chmod 644 /usr/local/share/man/man1/sortstudycli.1
 
 uninstall:
 	rm -f /usr/local/bin/$(BINNAME)\
-		/usr/local/share/man/man1/sortstudy-cli.1
+		/usr/local/share/man/man1/sortstudycli.1
 
 -include $(DEPS)

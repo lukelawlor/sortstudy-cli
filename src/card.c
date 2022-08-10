@@ -140,7 +140,7 @@ int read_deck(char **filenames, int filecount)
 		if (card != NULL)
 		{
 			// A card's front has been read, but not its back
-			fprintf(stderr, "sortstudy-cli: no back text found for a card in file \"%s\"\n", filenames[filenum]);
+			fprintf(stderr, "sortstudycli: no back text found for a card in file \"%s\"\n", filenames[filenum]);
 			free(card->front);
 			free(card);
 			errno = EIO;
@@ -151,7 +151,7 @@ int read_deck(char **filenames, int filecount)
 	if (temp_card_list_len == 0)
 	{
 		// No cards were fully read
-		fprintf(stderr, "sortstudy-cli: no cards found in file(s)\n");
+		fprintf(stderr, "sortstudycli: no cards found in file(s)\n");
 		free(temp_card_list);
 		return EIO;
 	}

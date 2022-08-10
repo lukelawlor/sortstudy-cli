@@ -71,7 +71,7 @@ int main(int argc, char **argv)
 		continue;
 
 		option_error:
-		fprintf(stderr, "sortstudy-cli: unknown option \"%s\"\n", argv[i]);
+		fprintf(stderr, "sortstudycli: unknown option \"%s\"\n", argv[i]);
 		exit(EXIT_FAILURE);
 	}
 
@@ -79,28 +79,28 @@ int main(int argc, char **argv)
 	if (filecount == 0)
 	{
 		PRINT_ERROR("no card files provided");
-		fprintf(stderr, "sortstudy-cli: no card files provided\n");
+		fprintf(stderr, "sortstudycli: no card files provided\n");
 		exit(EXIT_FAILURE);
 	}
 
 	// Init ncurses
 	if (initscr() == NULL)
 	{
-		fprintf(stderr, "sortstudy-cli: failed to initialize ncurses\n");
+		fprintf(stderr, "sortstudycli: failed to initialize ncurses\n");
 		exit(EXIT_FAILURE);
 	}
 
 	// Don't draw pressed keys on the screen
 	if (noecho() == ERR)
 	{
-		fprintf(stderr, "sortstudy-cli: noecho() failed\n");
+		fprintf(stderr, "sortstudycli: noecho() failed\n");
 		end_program(EXIT_FAILURE);
 	}
 
 	// Enable special keys for the standard screen
 	if (keypad(stdscr, true) == ERR)
 	{
-		fprintf(stderr, "sortstudy-cli: keypad() failed\n");
+		fprintf(stderr, "sortstudycli: keypad() failed\n");
 		end_program(EXIT_FAILURE);
 	}
 
@@ -120,5 +120,5 @@ void end_program(int exitcode)
 // Print the text output when -h is passed
 static void print_help(void)
 {
-	printf("Sort Study CLI, version %s\nusage: sortstudy-cli cardfile [cardfile2 ...] [options]\noptions:\n\t-s\tshuffle cards at start\n\t-b\tdisable card borders at start\n\t-f\tflip cards at start\n\t-h\tdisplay this help text\nbasic review mode controls:\n\tJ\tflip card\n\tK\tmark card as wrong\n\tL\tmark card as right\n\tD\tdelete card\n\tB\ttoggle card borders\n\tQ\tquit\n\nSort Study CLI home page: <https://github.com/lukelawlor/sortstudy-cli>\n", VERSION);
+	printf("Sort Study CLI, version %s\nusage: sortstudycli cardfile [cardfile2 ...] [options]\noptions:\n\t-s\tshuffle cards at start\n\t-b\tdisable card borders at start\n\t-f\tflip cards at start\n\t-h\tdisplay this help text\nbasic review mode controls:\n\tJ\tflip card\n\tK\tmark card as wrong\n\tL\tmark card as right\n\tD\tdelete card\n\tB\ttoggle card borders\n\tQ\tquit\n\nSort Study CLI home page: <https://github.com/lukelawlor/sortstudycli>\n", VERSION);
 }

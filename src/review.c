@@ -71,7 +71,7 @@ void start_review_mode(bool startup_shuffle, bool startup_noborder, bool startup
 	if (init_windows() != 0)
 	{
 		endwin();
-		fprintf(stderr, "sortstudy-cli: windows failed to initialize");
+		fprintf(stderr, "sortstudycli: windows failed to initialize");
 		exit(EXIT_FAILURE);
 	}
 
@@ -280,7 +280,7 @@ void prevent_small_screen(int my, int mx)
 		if (init_windows() != 0)
 		{
 			endwin();
-			fprintf(stderr, "sortstudy-cli: windows failed to initialize");
+			fprintf(stderr, "sortstudycli: windows failed to initialize");
 			exit(EXIT_FAILURE);
 		}
 	}
