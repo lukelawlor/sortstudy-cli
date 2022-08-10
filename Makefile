@@ -10,11 +10,12 @@ CFLAGS := -g -Wall
 DEPFLAGS := -MMD -MP
 LDFLAGS := -lncurses
 
-BIN := $(BUILD_DIR)/sortstudy
+BINNAME := sortstudy-cli
+BINPATH := $(BUILD_DIR)/$(BINNAME)
 
-all: $(BIN)
+all: $(BINPATH)
 
-$(BIN): $(OBJS)
+$(BINPATH): $(OBJS)
 	$(CC) $(OBJS) -o $@ $(LDFLAGS)
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
@@ -22,11 +23,17 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) $(DEPFLAGS) -c $< -o $@
 
 .DELETE_ON_ERROR:
-.PHONY: clean run
+.PHONY: clean install uninstall
 clean:
 	rm -rf $(BUILD_DIR)
 
-run: $(BIN)
-	@$(BIN) data/card2.txt data/card.txt
+install:
+	cp -f $(BINPATH) /usr/local/bin/$(BINNAME)
+	cp -f doc/sortstudy-cli.1 /usr/local/share/man/man1/
+	chmod 644 /usr/local/share/man/man1/sortstudy-cli.1
+
+uninstall:
+	rm -f /usr/local/bin/$(BINNAME)\
+		/usr/local/share/man/man1/sortstudy-cli.1
 
 -include $(DEPS)
