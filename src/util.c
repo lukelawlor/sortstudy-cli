@@ -1,3 +1,9 @@
+/*
+ * util.c
+ *
+ * This file contains miscellaneous functions
+ */
+
 #include "util.h"
 
 // Returns the number of digits in a positive base 10 int

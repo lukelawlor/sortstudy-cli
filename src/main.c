@@ -1,3 +1,9 @@
+/*
+ * main.c
+ *
+ * This file contains the main function and functions handle command line arguments
+ */
+
 #include <stdio.h>
 #include <time.h>
 #include <string.h>

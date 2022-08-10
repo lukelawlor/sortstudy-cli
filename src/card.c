@@ -1,3 +1,9 @@
+/*
+ * card.c
+ *
+ * This file contains variables with card data and functions used to load and manipulate decks of cards
+ */
+
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>

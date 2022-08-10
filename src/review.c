@@ -1,3 +1,9 @@
+/*
+ * review.c
+ *
+ * This file contains the base code for review mode. This includes functions that handle user input, user interface drawing, and basic card sorting.
+ */
+
 #include <stdbool.h>
 #include <string.h>
 #include <ctype.h>
@@ -198,7 +204,6 @@ void start_review_mode(bool startup_shuffle, bool startup_noborders, bool startu
 		is_full_review = numcards == card_list_len;
 
 		// Show review finished screen
-
 		REDRAW_INFOWIN();
 		wclear(frontwin);
 		DRAW_FRONTWIN();

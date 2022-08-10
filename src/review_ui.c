@@ -1,3 +1,9 @@
+/*
+ * review_ui.c
+ *
+ * This file contains functions for drawing individual pieces of the user interface of review mode.
+ */
+
 #include <stdbool.h>
 #include <string.h>
 #include <ctype.h>
