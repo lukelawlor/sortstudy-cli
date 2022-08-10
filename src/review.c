@@ -49,13 +49,13 @@ static void set_numcards(void);
 // Toggles the drawing of borders of cards
 static void toggle_borders(void);
 
-void start_review_mode(bool startup_shuffle, bool startup_noborder, bool startup_flip)
+void start_review_mode(bool startup_shuffle, bool startup_noborders, bool startup_flip)
 {
 	// Perform startup actions
 	if (startup_shuffle)
 		shuffle_cards();
 	
-	if (startup_noborder)
+	if (startup_noborders)
 		showborders = false;
 	
 	if (startup_flip)

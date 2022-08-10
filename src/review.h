@@ -23,7 +23,7 @@ extern bool is_full_review;
 extern bool review_finished;
 
 // Starts review mode
-void start_review_mode(bool startup_shuffle, bool startup_noborder, bool startup_flip);
+void start_review_mode(bool startup_shuffle, bool startup_noborders, bool startup_flip);
 
 // Checks if the screen's resolution is below the minimum allowed, and pauses the program's execution if so
 void prevent_small_screen(int my, int mx);
