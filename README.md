@@ -8,7 +8,7 @@ Currently available for Linux
 
 *From the man page:*
 
-`sortstudycli` is an ncurses interface for efficiently studying index cards.
+**sortstudycli** is an ncurses interface for efficiently studying index cards.
 
 Decks of index cards are contained in card files. These are text files in which the first line contains the front text of the first card, the next line contains the back text of the first card, the next line contains the front text of the next card, and so forth. Card files are formatted this way so they can be typed easily.
 
@@ -42,7 +42,7 @@ To modify card decks on the fly, Sort Study allows users to shuffle, flip, and d
 
 ## Dependencies
 
-This program uses **ncurses** for drawing to the terminal.
+This program uses ncurses for drawing to the terminal.
 
 On Debian-based Linux distros, you can install ncurses with this command:
 
@@ -59,12 +59,13 @@ On Debian-based Linux distros, you can install these with this command:
 Clone the repository and enter it like so:
 
     git clone https://github.com/lukelawlor/sortstudycli
+    cd sortstudycli
 
 Build the program with GNU make:
 
     make
 
-Then install it to `/usr/local/bin`:
+Then install the executable to /usr/local/bin:
 
     sudo make install
 
