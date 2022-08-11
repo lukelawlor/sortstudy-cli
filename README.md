@@ -44,7 +44,7 @@ To modify card decks on the fly, Sort Study allows users to shuffle, flip, and d
 
 This program uses ncurses for drawing to the terminal.
 
-On Debian-based Linux distros, you can install ncurses with this command:
+On Debian-based Linux distros, you can install the ncurses library with this command:
 
     sudo apt install ncurses-base
 
@@ -56,21 +56,16 @@ On Debian-based Linux distros, you can install these with this command:
 
     sudo apt install libncurses5-dev libncursesw5-dev make gcc
 
-Clone the repository and enter it like so:
+Clone the repository
 
     git clone https://github.com/lukelawlor/sortstudycli
     cd sortstudycli
 
-Build the program with GNU make:
+Build the program with GNU make
 
     make
 
-Then install the executable to /usr/local/bin:
+Install and uninstall like so
 
     sudo make install
-
-Uninstall the program like so:
-
     sudo make uninstall
-
-If you don't want to compile with GCC, feel free to use the compiler of your choice and set it to `CC` in the Makefile
