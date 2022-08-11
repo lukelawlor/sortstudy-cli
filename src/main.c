@@ -157,6 +157,7 @@ static void print_help(void)
 	"\tL\tmark card as right\n"
 	"\tD\tdelete card\n"
 	"\tQ\tquit\n\n"
+	"Type \"man sortstudycli\" for more information\n"
 	"Sort Study CLI home page: <https://github.com/lukelawlor/sortstudycli>\n"
 	, VERSION);
 }
