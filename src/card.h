@@ -10,11 +10,12 @@
 #define	TO_DELETE	2
 
 // Card and card state types
+typedef short cardstate_t;
 typedef struct card{
 	char *front;
 	char *back;
+	cardstate_t state;
 } card_t;
-typedef short cardstate_t;
 
 // Array of card pointers
 extern card_t **card_list;
@@ -22,11 +23,11 @@ extern card_t **card_list;
 // Length of card_list
 extern int card_list_len;
 
-// Array of card states
-extern cardstate_t *review_list;
-
 // Reads a deck of cards from one or more files
 int read_deck(char **filenames, int filecount);
+
+// Frees a card from its pointer
+void free_card(card_t *card);
 
 // Frees the a card array and all of its elements
 void free_card_list(card_t **, int);

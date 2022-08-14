@@ -17,14 +17,6 @@
 card_t **card_list;
 int card_list_len;
 
-/* This is an array holding the state
- *
- * 	A value of DO_REVIEW indicates that the corresponding card is marked for review
- * 	DONT_REVIEW indicates that the card shouldn't be reviewed
- * 	TO_DELETE marks the card for deletion
- */
-cardstate_t *review_list;
-
 /*
  * reads a file containing card text and stores its contents into cards contained in card_list, replacing the previous contents of card_list if successful, and resizing review_list to hold the maximum amount of cards needed to review
  *
@@ -36,7 +28,7 @@ int read_deck(char **filenames, int filecount)
 	// temp_card_list_len 	refers to the number of cards in the array
 	// temp_card_list_size	refers to the number of elements the array can hold
 	int temp_card_list_len, temp_card_list_size;
-	card_t **temp_card_list, **temp_card_ptr;
+	card_t **temp_card_list;
 	card_t *card;
 
 	card = NULL;
@@ -78,7 +70,7 @@ int read_deck(char **filenames, int filecount)
 				// Check if the front or back of the card is being read
 				if (front)
 				{
-					// Allocate mem for a new card + its front string
+					// Allocate mem for a new card, its front string, and its state
 					if ((card = malloc(sizeof(card_t))) == NULL)
 					{
 						perror("malloc");
@@ -91,8 +83,12 @@ int read_deck(char **filenames, int filecount)
 						goto read_deck_error;
 					}
 
+					// Initializing state
+					card->state = DO_REVIEW;
+
 					// Copy buffer into the front string of the card
 					strncpy(card->front, buffer, bp);
+
 				}
 				else
 				{
@@ -113,15 +109,12 @@ int read_deck(char **filenames, int filecount)
 					if (temp_card_list_len == temp_card_list_size)
 					{
 						temp_card_list_size += CARD_ARRAY_ESTSIZE;
-						if ((temp_card_ptr = reallocarray(temp_card_list, temp_card_list_size, sizeof(card_t *))) == NULL)
+						if ((temp_card_list = reallocarray(temp_card_list, temp_card_list_size, sizeof(card_t *))) == NULL)
 						{
 							perror("reallocarray");
-							free(card->back);
-							free(card->front);
-							free(card);
+							free_card(card);
 							goto read_deck_error;
 						}
-						temp_card_list = temp_card_ptr;
 					}
 					temp_card_list[temp_card_list_len++] = card;
 					card = NULL;
@@ -162,36 +155,25 @@ int read_deck(char **filenames, int filecount)
 		return EIO;
 	}
 
-	// Resize the list to fit the actual number of card pointers it contains
-	if ((temp_card_ptr = reallocarray(temp_card_list, temp_card_list_len, sizeof(card_t *))) == NULL)
+	// Resize temp_card_list to fit the actual number of card pointers it contains
+	if ((temp_card_list = reallocarray(temp_card_list, temp_card_list_len, sizeof(card_t *))) == NULL)
 	{
 		perror("reallocarray");
 		goto read_deck_error;
 	}
-	temp_card_list = temp_card_ptr;
 
 	// Resize review_list 
-	cardstate_t *temp_cardstate_ptr;
-	if ((temp_cardstate_ptr = reallocarray(review_list, temp_card_list_len, sizeof(cardstate_t))) == NULL)
-	{
-		perror("reallocarray");
-		goto read_deck_error;
-	}
-	review_list = temp_cardstate_ptr;
 
-	// Set all elements in review_list to DO_REVIEW
-	for (int i = 0; i < temp_card_list_len; i++)
-		review_list[i] = DO_REVIEW;
-
-	// Alloc new mem for card_list; if successful, free everything in card_list and its value
+	// Alloc new mem for card_list; if successful, free everything in card_list and set its value
 	// to the new pointer
-	if ((temp_card_ptr = calloc(temp_card_list_len, sizeof(card_t *))) == NULL)
+	card_t **temp_card_list_ptr;
+	if ((temp_card_list_ptr = calloc(temp_card_list_len, sizeof(card_t *))) == NULL)
 	{
 		perror("calloc");
 		goto read_deck_error;
 	}
 	free_card_list(card_list, card_list_len);
-	card_list = temp_card_ptr;
+	card_list = temp_card_list_ptr;
 
 	// Copy the elements of temp_card_list into card_list, then set card_list_len
 	for (int i = 0; i < temp_card_list_len; i++)
@@ -209,16 +191,22 @@ int read_deck(char **filenames, int filecount)
 }
 
 /*
+ * frees a card pointer (type card_t *)
+ */
+void free_card(card_t *card)
+{
+	free(card->front);
+	free(card->back);
+	free(card);
+}
+
+/*
  * frees a card list (type card_t **) and all of its elements
  */
 void free_card_list(card_t **list, int len)
 {
 	for (int i = 0; i < len; i++)
-	{
-		free(list[i]->front);
-		free(list[i]->back);
-		free(list[i]);
-	}
+		free_card(list[i]);
 	free(list);
 }
 
@@ -231,55 +219,38 @@ int delete_marked_cards(void)
 {
 	// Allocate new mem for card_list and review_list
 	card_t **new_card_list;
-	cardstate_t *new_review_list;
 	int new_len;
 
 	new_len = card_list_len;
 	for (int i = 0; i < card_list_len; i++)
-		if (review_list[i] == TO_DELETE)
+		if (card_list[i]->state == TO_DELETE)
 			new_len--;
 	
 	if ((new_card_list = calloc(new_len, sizeof(card_t *))) == NULL)
 		return errno;
-	
-	if ((new_review_list = calloc(new_len, sizeof(cardstate_t))) == NULL)
-	{
-		free(new_card_list);
-		return errno;
-	}
-	
-	// Free mem of deleted cards and set their indexes in card_list to NULL
-	for (int i = 0; i < card_list_len; i++)
-	{
-		if (review_list[i] == TO_DELETE)
-		{
-			free(card_list[i]->back);
-			free(card_list[i]->front);
-			free(card_list[i]);
-			card_list[i] = NULL;
-		}
-	}
-	
-	// Add cards from card_list to new_card_list
-	
-	// Position in new_card_list and new_review_list
+
+	// Position in new_card_list
 	int np;
 
+	// Add card pointers to new_card_list and free cards marked for deletion
 	np = 0;
 	for (int i = 0; i < card_list_len; i++)
 	{
-		if (card_list[i] != NULL)
+		if (card_list[i]->state != TO_DELETE)
 		{
-			new_card_list[np] = card_list[i];
-			new_review_list[np++] = review_list[i];
+			// Card isn't marked for deletion, add its pointer to new_card_list
+			new_card_list[np++] = card_list[i];
+		}
+		else
+		{
+			// Card is marked for deletion, free it
+			free_card(card_list[i]);
 		}
 	}
 
-	// Free data left in card_list and review_list and set them to their new counterparts
+	// Free card_list itself and set it to new_card_list
 	free(card_list);
-	free(review_list);
 	card_list = new_card_list;
-	review_list = new_review_list;
 	card_list_len = new_len;
 
 	return 0;

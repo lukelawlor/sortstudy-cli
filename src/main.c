@@ -1,7 +1,7 @@
 /*
  * main.c
  *
- * This file contains the main function and functions handle command line arguments
+ * This file contains the main function and functions that handle command line arguments
  */
 
 #include <stdio.h>

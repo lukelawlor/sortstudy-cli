@@ -96,7 +96,7 @@ void start_review_mode(bool startup_shuffle, bool startup_noborders, bool startu
 		for (int i = 0; i < card_list_len; i++)
 		{
 			// Don't display cards that haven't been marked for review
-			if (review_list[i] != DO_REVIEW)
+			if (card_list[i]->state != DO_REVIEW)
 				continue;
 	
 			// Update global variables used for drawing
@@ -134,14 +134,14 @@ void start_review_mode(bool startup_shuffle, bool startup_noborders, bool startu
 					goto get_input;
 				case 'k':
 					// Mark card as wrong
-					review_list[i] = DO_REVIEW;
+					card_list[i]->state = DO_REVIEW;
 					all_cards_right = false;
 					wrong_cards++;
 					strncpy(lastaction, "Marked card wrong", 18);
 					break;
 				case 'l':
 					// Mark card as right
-					review_list[i] = DONT_REVIEW;
+					card_list[i]->state = DONT_REVIEW;
 					right_cards++;
 					strncpy(lastaction, "Marked card right", 18);
 					break;
@@ -154,7 +154,7 @@ void start_review_mode(bool startup_shuffle, bool startup_noborders, bool startu
 						goto get_input;
 					}
 
-					review_list[i] = TO_DELETE;
+					card_list[i]->state = TO_DELETE;
 					if (delete_marked_cards() == 0)
 					{
 						// Delete successful, decrement cardpos to not skip over the next card
@@ -172,7 +172,7 @@ void start_review_mode(bool startup_shuffle, bool startup_noborders, bool startu
 					{
 						// Delete unsuccessful
 						strncpy(lastaction, "Delete error", 13);
-						review_list[i] = DO_REVIEW;
+						card_list[i]->state = DO_REVIEW;
 						REDRAW_INFOWIN();
 						goto get_input;
 					}
@@ -193,7 +193,7 @@ void start_review_mode(bool startup_shuffle, bool startup_noborders, bool startu
 		// If the user marked all cards as right this review, review every card again
 		if (all_cards_right)
 			for (int i = 0; i < card_list_len; i++)
-				review_list[i] = DO_REVIEW;
+				card_list[i]->state = DO_REVIEW;
 
 		// Update global variables for drawing
 		cardpos = 0;
@@ -298,7 +298,7 @@ static void set_numcards(void)
 {
 	numcards = 0;
 	for (int i = 0; i < card_list_len; i++)
-		if (review_list[i] == DO_REVIEW)
+		if (card_list[i]->state == DO_REVIEW)
 			numcards++;
 }
 
