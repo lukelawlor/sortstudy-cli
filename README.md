@@ -4,7 +4,7 @@ A simple, free, and open source command line interface for efficiently studying 
 
 Currently available for Linux
 
-![screenshot](docs/screenshot.png)
+![screenshot](doc/screenshot.png)
 
 *From the man page:*
 
