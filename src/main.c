@@ -16,7 +16,7 @@
 #include "card.h"
 #include "review.h"
 
-#define	VERSION	"1.0.0"
+#define	VERSION	"1.0.1"
 
 // Flags for startup actions in review mode
 static bool startup_shuffle = false;
