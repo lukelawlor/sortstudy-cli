@@ -115,15 +115,25 @@ int main(int argc, char **argv)
 	// Don't draw pressed keys on the screen
 	if (noecho() == ERR)
 	{
+		endwin();
 		fprintf(stderr, "sortstudycli: ncurses noecho function failed\n");
-		end_program(EXIT_FAILURE);
+		exit(EXIT_FAILURE);
 	}
 
 	// Enable special keys for the standard screen
 	if (keypad(stdscr, true) == ERR)
 	{
+		endwin();
 		fprintf(stderr, "sortstudycli: ncurses keypad function failed\n");
-		end_program(EXIT_FAILURE);
+		exit(EXIT_FAILURE);
+	}
+
+	// Hide cursor
+	if (curs_set(0) == ERR)
+	{
+		endwin();
+		fprintf(stderr, "sortstudycli: ncurses curs_set(0) call failed; cursor will not be hidden\n");
+		refresh();
 	}
 
 	// Set random seed
