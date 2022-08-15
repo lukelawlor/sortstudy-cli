@@ -124,8 +124,29 @@ int read_deck(char **filenames, int filecount)
 				front = front ? false : true;
 				bp = 0;
 			}
-			else	// Collect characters in buffer
+			else
+			{
+				// Collect characters in buffer
+
+				// Handle escape sequences
+				if (c == '\\')
+				{
+					switch (c = fgetc(cardfile))
+					{
+						case 'n':
+							c = '\n';
+							break;
+						case '\n':
+							// Backslash was placed at the end of a line
+							buffer[bp++] = '\\';
+							ungetc(c, cardfile);
+							continue;
+					}
+					
+				}
+
 				buffer[bp++] = c;
+			}
 
 		}
 

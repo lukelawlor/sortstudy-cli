@@ -195,6 +195,6 @@ static void handle_verbose_option(const char *str)
 		exit(EXIT_SUCCESS);
 	}
 
-	fprintf(stderr, "sortstudycli: unknown option \"--%s\"", str);
+	fprintf(stderr, "sortstudycli: unknown option \"--%s\"\n", str);
 	exit(EXIT_FAILURE);
 }
