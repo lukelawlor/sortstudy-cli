@@ -1,3 +1,12 @@
+/*
+ * card.h
+ *
+ * This file contains card types and basic functions for manipulating cards
+ */
+
+#ifndef	CARD_H
+#define	CARD_H
+
 // The estimated size for card_list when reading a deck
 #define	CARD_ARRAY_ESTSIZE	100
 
@@ -33,3 +42,5 @@ void free_card_list(card_t **, int);
 
 // Deletes cards in card_list that have the state TO_DELETE
 int delete_marked_cards(void);
+
+#endif

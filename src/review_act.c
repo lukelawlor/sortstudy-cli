@@ -1,12 +1,14 @@
 /*
  * review_act.c
  *
- * This file contains functions for manipulating cards in review mode through special user actions. These include flipping and shuffling cards.
+ * This file contains functions for manipulating cards in review mode through special user actions.
+ *
+ * These include flipping and shuffling cards.
  */
 
+#include <errno.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include <errno.h>
 #include <wchar.h>
 
 #include "card.h"

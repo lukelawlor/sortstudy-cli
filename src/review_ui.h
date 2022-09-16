@@ -1,3 +1,12 @@
+/*
+ * review_ui.h
+ *
+ * This file contains function prototypes for review_ui.c functions and global variable declarations for variables used in these functions.
+ */
+
+#ifndef	REVIEW_UI_H
+#define	REVIEW_UI_H
+
 // Draw the front card window
 #define	DRAW_FRONTWIN()		draw_card_win(frontwin, fronttext)
 
@@ -27,3 +36,5 @@ void draw_infowin(void);
 
 // Draws a card window
 void draw_card_win(WINDOW *win, wchar_t *text);
+
+#endif

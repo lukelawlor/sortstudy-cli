@@ -1,3 +1,12 @@
+/*
+ * util.h
+ *
+ * This file contains miscellaneous macros.
+ */
+
+#ifndef	UTIL_H
+#define	UTIL_H
+
 // Returns the literal characters passed to it as a string
 #define	STR_LIT(x)	#x
 
@@ -9,3 +18,5 @@
 
 // Returns the number of digits in a positive base 10 int
 int get_digits(int x);
+
+#endif

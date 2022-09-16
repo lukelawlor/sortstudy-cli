@@ -1,7 +1,7 @@
 /*
  * util.c
  *
- * This file contains miscellaneous functions
+ * This file contains miscellaneous functions.
  */
 
 #include "util.h"

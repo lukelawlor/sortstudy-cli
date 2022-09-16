@@ -4,11 +4,11 @@
  * This file contains the base code for review mode. This includes functions that handle user input, user interface drawing, and basic card sorting.
  */
 
-#include <stdbool.h>
-#include <string.h>
 #include <ctype.h>
-#include <stdlib.h>
 #include <errno.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
 #include <wchar.h>
 
 // Include ncurses with wide character support

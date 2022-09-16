@@ -1,3 +1,12 @@
+/*
+ * review.h
+ *
+ * This file contains global variable declarations for review mode components.
+ */
+
+#ifndef	REVIEW_H
+#define	REVIEW_H
+
 // Maximum number of cards printed in the info window
 #define	MAX_INFO_CARDS		999
 
@@ -27,3 +36,5 @@ void start_review_mode(bool startup_shuffle, bool startup_noborders, bool startu
 
 // Checks if the screen's resolution is below the minimum allowed, and pauses the program's execution if so
 void prevent_small_screen(int my, int mx);
+
+#endif

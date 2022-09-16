@@ -7,9 +7,9 @@
 #include <errno.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <wchar.h>
 
@@ -28,13 +28,17 @@ int card_list_len;
 int read_deck(char **filenames, int filecount)
 {
 	// Temp array used to store card data before it's transferred to card_list
-	// temp_card_list_len 	refers to the number of cards in the array
-	// temp_card_list_size	refers to the number of elements the array can hold
-	int temp_card_list_len, temp_card_list_size;
 	card_t **temp_card_list;
-	card_t *card;
 
-	card = NULL;
+	// The number of cards in the array
+	int temp_card_list_len;
+
+	// The number of elements the array can hold
+	int temp_card_list_size;
+
+	// Current card being manipulated
+	card_t *card = NULL;
+
 	temp_card_list_size = CARD_ARRAY_ESTSIZE;
 	if ((temp_card_list = calloc(temp_card_list_size, sizeof(card_t *))) == NULL)
 	{
@@ -42,9 +46,6 @@ int read_deck(char **filenames, int filecount)
 		return errno;
 	}
 
-	// Vars for reading the card file
-	bool front;
-	
 	// Buffer used to store characters read on each line
 	wchar_t buffer[MAX_LINE_CHARS];
 
@@ -54,12 +55,16 @@ int read_deck(char **filenames, int filecount)
 	// Current character being read
 	wint_t c;
 
+	// True if the front of the card is being read
+	bool front;
+
 	front = true;
 	temp_card_list_len = bp = 0;
 
 	// Open card files and read them
 	FILE *cardfile;
 
+	// Loop through all files passed to this function
 	for (int filenum = 0; filenum < filecount; filenum++)
 	{
 		if ((cardfile = fopen(filenames[filenum], "r")) == NULL)
@@ -68,6 +73,7 @@ int read_deck(char **filenames, int filecount)
 			return errno;
 		}
 
+		// Process characters from the file one by one
 		while ((c = fgetwc(cardfile)) != WEOF)
 		{
 			if (c == L'\n' || bp == MAX_LINE_CHARS - 1)
@@ -163,10 +169,9 @@ int read_deck(char **filenames, int filecount)
 			goto read_deck_error;
 		}
 
-		// Handle reading errors
 		if (card != NULL)
 		{
-			// A card's front has been read, but not its back
+			// Error: a card's front has been read, but not its back
 			fprintf(stderr, "sortstudycli: no back text found for a card in file \"%s\"\n", filenames[filenum]);
 			free(card->front);
 			free(card);
@@ -177,7 +182,7 @@ int read_deck(char **filenames, int filecount)
 
 	if (temp_card_list_len == 0)
 	{
-		// No cards were fully read
+		// Error: no cards were fully read
 		fprintf(stderr, "sortstudycli: no cards found in file(s)\n");
 		free(temp_card_list);
 		return EIO;
@@ -190,10 +195,7 @@ int read_deck(char **filenames, int filecount)
 		goto read_deck_error;
 	}
 
-	// Resize review_list 
-
-	// Alloc new mem for card_list; if successful, free everything in card_list and set its value
-	// to the new pointer
+	// Allocate new mem for card_list; if successful, free everything in card_list and set its value to the new pointer
 	card_t **temp_card_list_ptr;
 	if ((temp_card_list_ptr = calloc(temp_card_list_len, sizeof(card_t *))) == NULL)
 	{
@@ -213,7 +215,6 @@ int read_deck(char **filenames, int filecount)
 	
 	// Free temp list & its contents on random errors
 	read_deck_error:
-
 	free_card_list(temp_card_list, temp_card_list_len);
 	return errno;
 }
