@@ -4,16 +4,15 @@
 // The maximum amount of characters read for each line in a card file
 #define	MAX_LINE_CHARS		5000
 
-// Card state values
-#define	DONT_REVIEW	0
-#define	DO_REVIEW	1
-#define	TO_DELETE	2
-
 // Card and card state types
-typedef short cardstate_t;
+typedef enum cardstate{
+	CARDSTATE_DONT_REVIEW,
+	CARDSTATE_DO_REVIEW,
+	CARDSTATE_TO_DELETE
+} cardstate_t;
 typedef struct card{
-	char *front;
-	char *back;
+	wchar_t *front;
+	wchar_t *back;
 	cardstate_t state;
 } card_t;
 

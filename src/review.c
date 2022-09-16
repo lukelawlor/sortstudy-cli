@@ -9,8 +9,11 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <wchar.h>
 
-#include <ncurses.h>
+// Include ncurses with wide character support
+#define	_XOPEN_SOURCE_EXTENDED
+#include <ncursesw/curses.h>
 
 #include "main.h"
 #include "card.h"
@@ -19,7 +22,7 @@
 #include "review.h"
 
 // Text
-#define	REVIEW_FINISH_TEXT	"Review Complete!\n  Press N to start the next review\n  Press S to shuffle the cards\n  Press F to flip the cards"
+#define	REVIEW_FINISH_TEXT	L"Review Complete!\n  Press N to start the next review\n  Press S to shuffle the cards\n  Press F to flip the cards"
 #define	SMALL_WIN_TEXT		"This window is too small to run sort study"
 
 // Minimum screen dimensions
@@ -49,7 +52,7 @@ bool review_finished = false;
 // Text containing last action made by the user to display in the info window
 char lastaction[23];
 
-// Sets numcards based on the amount of cards with the DO_REVIEW state
+// Sets numcards based on the amount of cards with the CARDSTATE_DO_REVIEW state
 static void set_numcards(void);
 
 // Toggles the drawing of borders of cards
@@ -96,7 +99,7 @@ void start_review_mode(bool startup_shuffle, bool startup_noborders, bool startu
 		for (int i = 0; i < card_list_len; i++)
 		{
 			// Don't display cards that haven't been marked for review
-			if (card_list[i]->state != DO_REVIEW)
+			if (card_list[i]->state != CARDSTATE_DO_REVIEW)
 				continue;
 	
 			// Update global variables used for drawing
@@ -134,14 +137,14 @@ void start_review_mode(bool startup_shuffle, bool startup_noborders, bool startu
 					goto get_input;
 				case 'k':
 					// Mark card as wrong
-					card_list[i]->state = DO_REVIEW;
+					card_list[i]->state = CARDSTATE_DO_REVIEW;
 					all_cards_right = false;
 					wrong_cards++;
 					strncpy(lastaction, "Marked card wrong", 18);
 					break;
 				case 'l':
 					// Mark card as right
-					card_list[i]->state = DONT_REVIEW;
+					card_list[i]->state = CARDSTATE_DONT_REVIEW;
 					right_cards++;
 					strncpy(lastaction, "Marked card right", 18);
 					break;
@@ -154,7 +157,7 @@ void start_review_mode(bool startup_shuffle, bool startup_noborders, bool startu
 						goto get_input;
 					}
 
-					card_list[i]->state = TO_DELETE;
+					card_list[i]->state = CARDSTATE_TO_DELETE;
 					if (delete_marked_cards() == 0)
 					{
 						// Delete successful, decrement cardpos to not skip over the next card
@@ -172,7 +175,7 @@ void start_review_mode(bool startup_shuffle, bool startup_noborders, bool startu
 					{
 						// Delete unsuccessful
 						strncpy(lastaction, "Delete error", 13);
-						card_list[i]->state = DO_REVIEW;
+						card_list[i]->state = CARDSTATE_DO_REVIEW;
 						REDRAW_INFOWIN();
 						goto get_input;
 					}
@@ -180,20 +183,24 @@ void start_review_mode(bool startup_shuffle, bool startup_noborders, bool startu
 				case 'b':
 					toggle_borders();
 					goto get_input;
+					break;
 				case KEY_RESIZE:
 					resize_window();
 					goto get_input;
+					break;
 				case 'q':
 					end_program(EXIT_SUCCESS);
+					break;
 				default:
 					goto get_input;
+					break;
 			}
 		}
 
 		// If the user marked all cards as right this review, review every card again
 		if (all_cards_right)
 			for (int i = 0; i < card_list_len; i++)
-				card_list[i]->state = DO_REVIEW;
+				card_list[i]->state = CARDSTATE_DO_REVIEW;
 
 		// Update global variables for drawing
 		cardpos = 0;
@@ -292,13 +299,13 @@ void prevent_small_screen(int my, int mx)
 }
 
 /*
- * set numcards (the total number of cards being reviewed) to the amount of DO_REVIEW values in review_list (declared in card.c)
+ * set numcards (the total number of cards being reviewed) to the amount of CARDSTATE_DO_REVIEW values in review_list (declared in card.c)
  */
 static void set_numcards(void)
 {
 	numcards = 0;
 	for (int i = 0; i < card_list_len; i++)
-		if (card_list[i]->state == DO_REVIEW)
+		if (card_list[i]->state == CARDSTATE_DO_REVIEW)
 			numcards++;
 }
 

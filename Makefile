@@ -6,9 +6,9 @@ OBJS := $(SRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
 DEPS := $(OBJS:.o=.d)
 
 CC := gcc
-CFLAGS := -Wall -g
+CFLAGS := -Wall -Wextra
 DEPFLAGS := -MMD -MP
-LDFLAGS := -lncurses
+LDFLAGS := $(shell ncursesw5-config --cflags --libs)
 
 BINNAME := sortstudycli
 BINPATH := $(BUILD_DIR)/$(BINNAME)

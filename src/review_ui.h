@@ -8,7 +8,7 @@
 extern WINDOW *infowin, *frontwin, *backwin;
 
 // Text to show on the front and back card windows being drawn
-extern char *fronttext, *backtext;
+extern wchar_t *fronttext, *backtext;
 
 // True if the back of the card should be drawn
 extern bool showback;
@@ -26,4 +26,4 @@ void resize_window(void);
 void draw_infowin(void);
 
 // Draws a card window
-void draw_card_win(WINDOW *win, char *text);
+void draw_card_win(WINDOW *win, wchar_t *text);

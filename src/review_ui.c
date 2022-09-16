@@ -8,8 +8,11 @@
 #include <string.h>
 #include <ctype.h>
 #include <errno.h>
+#include <wchar.h>
 
-#include <ncurses.h>
+// Include ncurses with wide character support
+#define	_XOPEN_SOURCE_EXTENDED
+#include <ncursesw/curses.h>
 
 #include "util.h"
 #include "review_ui.h"
@@ -32,7 +35,7 @@
 #define	GET_CARD_WIN_X(mx)	mx / 2 - card_win_w / 2
 
 WINDOW *infowin, *frontwin, *backwin;
-char *fronttext, *backtext;
+wchar_t *fronttext, *backtext;
 
 // Controls the visibility of the back of the card being viewed
 bool showback = false;
@@ -147,7 +150,7 @@ void draw_infowin(void)
 /*
  * draws a card window with or without borders; this is used to draw the front and back of cards
  */
-void draw_card_win(WINDOW *win, char *text)
+void draw_card_win(WINDOW *win, wchar_t *text)
 {
 	if (showborders)
 	{
@@ -155,7 +158,8 @@ void draw_card_win(WINDOW *win, char *text)
 
 		// Draw text within border
 		bool full_text_drawn = false;
-		int c, y, x, i;
+		int y, x, i;
+		wchar_t c;
 
 		i = 0;
 		y = 1;
@@ -184,7 +188,8 @@ void draw_card_win(WINDOW *win, char *text)
 					wmove(win, ++y, (x = 1));
 				if (y > card_win_h - 2)
 					break;
-				waddch(win, c);
+				//waddch(win, c);
+				wprintw(win, "%lc", c);
 			}
 			x++;
 		}
@@ -195,10 +200,12 @@ void draw_card_win(WINDOW *win, char *text)
 	}
 	else
 	{
-		mvwaddstr(win, 0, 0, text);
+		//move(win, 0, 0);
+		//waddwstr(win, text);
+		mvwaddwstr(win, 0, 0, text);
 
 		// Draw ">" for same reason as above
-		if (strlen(text) > (card_win_w * card_win_h))
+		if (wcslen(text) > (size_t) (card_win_w * card_win_h))
 			mvwaddch(win, card_win_h - 1, card_win_w - 1, '>');
 	}
 }

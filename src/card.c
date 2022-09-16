@@ -4,11 +4,14 @@
  * This file contains variables with card data and functions used to load and manipulate decks of cards
  */
 
-#include <stdio.h>
-#include <stdbool.h>
-#include <string.h>
-#include <stdlib.h>
 #include <errno.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <wchar.h>
 
 #include "util.h"
 #include "card.h"
@@ -42,9 +45,14 @@ int read_deck(char **filenames, int filecount)
 	// Vars for reading the card file
 	bool front;
 	
-	// Buffer used to store characters read on each line; bp = buffer position
-	char buffer[MAX_LINE_CHARS];
-	int bp, c;
+	// Buffer used to store characters read on each line
+	wchar_t buffer[MAX_LINE_CHARS];
+
+	// Buffer position
+	int bp;
+
+	// Current character being read
+	wint_t c;
 
 	front = true;
 	temp_card_list_len = bp = 0;
@@ -60,23 +68,23 @@ int read_deck(char **filenames, int filecount)
 			return errno;
 		}
 
-		while ((c = fgetc(cardfile)) != EOF)
+		while ((c = fgetwc(cardfile)) != WEOF)
 		{
-			if (c == '\n' || bp == MAX_LINE_CHARS - 1)
+			if (c == L'\n' || bp == MAX_LINE_CHARS - 1)
 			{
 				// Null-terminate the buffer so it can safely be copied into strings
-				buffer[bp++] = '\0';
+				buffer[bp++] = L'\0';
 
 				// Check if the front or back of the card is being read
 				if (front)
 				{
-					// Allocate mem for a new card, its front string, and its state
+					// Allocate mem for a new card and its front string
 					if ((card = malloc(sizeof(card_t))) == NULL)
 					{
 						perror("malloc");
 						goto read_deck_error;
 					}
-					if ((card->front = calloc(bp, sizeof(char))) == NULL)
+					if ((card->front = calloc(bp, sizeof(wchar_t))) == NULL)
 					{
 						perror("calloc");
 						free(card);
@@ -84,16 +92,15 @@ int read_deck(char **filenames, int filecount)
 					}
 
 					// Initializing state
-					card->state = DO_REVIEW;
+					card->state = CARDSTATE_DO_REVIEW;
 
 					// Copy buffer into the front string of the card
-					strncpy(card->front, buffer, bp);
-
+					wcsncpy(card->front, buffer, bp);
 				}
 				else
 				{
 					// Allocate mem for the back string of the card
-					if ((card->back = calloc(bp, sizeof(char))) == NULL)
+					if ((card->back = calloc(bp, sizeof(wchar_t))) == NULL)
 					{
 						perror("calloc");
 						free(card->front);
@@ -102,7 +109,7 @@ int read_deck(char **filenames, int filecount)
 					}
 					
 					// Copy buffer into the back text of the card
-					strncpy(card->back, buffer, bp);
+					wcsncpy(card->back, buffer, bp);
 
 					// Store a pointer to the card in the list if there's enough space in the array,
 					// if not, resize the array
@@ -129,17 +136,17 @@ int read_deck(char **filenames, int filecount)
 				// Collect characters in buffer
 
 				// Handle escape sequences
-				if (c == '\\')
+				if (c == L'\\')
 				{
-					switch (c = fgetc(cardfile))
+					switch (c = fgetwc(cardfile))
 					{
-						case 'n':
-							c = '\n';
+						case L'n':
+							c = L'\n';
 							break;
-						case '\n':
+						case L'\n':
 							// Backslash was placed at the end of a line
-							buffer[bp++] = '\\';
-							ungetc(c, cardfile);
+							buffer[bp++] = L'\\';
+							ungetwc(c, cardfile);
 							continue;
 					}
 					
@@ -244,7 +251,7 @@ int delete_marked_cards(void)
 
 	new_len = card_list_len;
 	for (int i = 0; i < card_list_len; i++)
-		if (card_list[i]->state == TO_DELETE)
+		if (card_list[i]->state == CARDSTATE_TO_DELETE)
 			new_len--;
 	
 	if ((new_card_list = calloc(new_len, sizeof(card_t *))) == NULL)
@@ -257,7 +264,7 @@ int delete_marked_cards(void)
 	np = 0;
 	for (int i = 0; i < card_list_len; i++)
 	{
-		if (card_list[i]->state != TO_DELETE)
+		if (card_list[i]->state != CARDSTATE_TO_DELETE)
 		{
 			// Card isn't marked for deletion, add its pointer to new_card_list
 			new_card_list[np++] = card_list[i];

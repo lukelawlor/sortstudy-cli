@@ -9,14 +9,18 @@
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <locale.h>
+#include <wchar.h>
 
-#include <ncurses.h>
+// Include ncurses with wide character support
+#define	_XOPEN_SOURCE_EXTENDED
+#include <ncursesw/curses.h>
 
 #include "main.h"
 #include "card.h"
 #include "review.h"
 
-#define	VERSION	"1.0.1"
+#define	VERSION	"1.1.0"
 
 // Flags for startup actions in review mode
 static bool startup_shuffle = false;
@@ -31,6 +35,12 @@ static void handle_verbose_option(const char *str);
 
 int main(int argc, char **argv)
 {
+	if (setlocale(LC_ALL, "") == NULL)
+	{
+		fprintf(stderr, "sortstudycli: failed to set locale\n");
+		exit(EXIT_FAILURE);
+	}
+
 	// Handle command line arguments
 	if (argc == 1)
 	{
