@@ -6,7 +6,7 @@ OBJS := $(SRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
 DEPS := $(OBJS:.o=.d)
 
 CC := gcc
-CFLAGS := -Wall -Wextra
+CFLAGS := -Wall -Wextra -Werror -g -Wimplicit-fallthrough=0
 DEPFLAGS := -MMD -MP
 LDFLAGS := $(shell ncursesw5-config --cflags --libs)
 

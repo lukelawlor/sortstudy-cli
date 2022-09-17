@@ -255,6 +255,9 @@ int delete_marked_cards(void)
 		if (card_list[i]->state == CARDSTATE_TO_DELETE)
 			new_len--;
 	
+	if (new_len * sizeof(card_t *) > PTRDIFF_MAX)
+		return EIO;
+
 	if ((new_card_list = calloc(new_len, sizeof(card_t *))) == NULL)
 		return errno;
 

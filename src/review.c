@@ -183,17 +183,13 @@ void start_review_mode(bool startup_shuffle, bool startup_noborders, bool startu
 				case 'b':
 					toggle_borders();
 					goto get_input;
-					break;
 				case KEY_RESIZE:
 					resize_window();
 					goto get_input;
-					break;
 				case 'q':
 					end_program(EXIT_SUCCESS);
-					break;
 				default:
 					goto get_input;
-					break;
 			}
 		}
 
