@@ -22,7 +22,7 @@
 #include "review.h"
 
 // Text
-#define	REVIEW_FINISH_TEXT	L"Review Complete!\n  Press N to start the next review\n  Press S to shuffle the cards\n  Press F to flip the cards"
+#define	REVIEW_FINISH_TEXT	L"Review Complete!\n  Press N to start the next review\n  Press S to shuffle the cards\n  Press F to flip the cards\n  Press D to delete all cards you've just marked as correct"
 #define	SMALL_WIN_TEXT		"This window is too small to run sort study"
 
 // Minimum screen dimensions
@@ -234,6 +234,13 @@ void start_review_mode(bool startup_shuffle, bool startup_noborders, bool startu
 						strncpy(lastaction, "Shuffled cards", 15);
 					else
 						strncpy(lastaction, "Shuffle calloc error", 21);
+					REDRAW_INFOWIN();
+					break;
+				case 'd':
+					if (delete_correct_cards() == 0)
+						strncpy(lastaction, "Deleted correct cards", 22);
+					else
+						strncpy(lastaction, "Deletion error", 15);
 					REDRAW_INFOWIN();
 					break;
 				case 'q':

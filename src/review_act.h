@@ -16,4 +16,7 @@ void flip_cards(void);
 // Shuffle cards in card_list
 int shuffle_cards(void);
 
+// Deletes all cards that have the state CARDSTATE_DONT_REVIEW
+int delete_correct_cards(void);
+
 #endif

@@ -91,3 +91,27 @@ int shuffle_cards(void)
 	free(old_indexes);
 	return 0;
 }
+
+/*
+ * deletes all cards that have the state CARDSTATE_DONT_REVIEW
+ */
+int delete_correct_cards(void)
+{
+	// Set cards with CARDSTATE_DONT_REVIEW to CARDSTATE_TO_DELETE
+	for (int i = 0; i < card_list_len; i++)
+		if (card_list[i]->state == CARDSTATE_DONT_REVIEW)
+			card_list[i]->state = CARDSTATE_TO_DELETE;
+	
+	int error_code = delete_marked_cards();
+	if (error_code == 0)
+	{
+		// Success
+		return 0;
+	}
+
+	// Deleting has failed by this point, revert card states
+	for (int i = 0; i < card_list_len; i++)
+		if (card_list[i]->state == CARDSTATE_TO_DELETE)
+			card_list[i]->state = CARDSTATE_DONT_REVIEW;
+	return error_code;
+}

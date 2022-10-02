@@ -1,4 +1,4 @@
-.TH SORTSTUDYCLI 1  2022-08-10
+.TH SORTSTUDYCLI 1  2022-10-1
 
 .SH NAME
 sortstudycli \- simple index card studying tool
@@ -43,34 +43,41 @@ flip cards (swaps front and back text) at startup
 .BR \-v ", " \-\-version
 show version and exit
 
-.SH CONTROLS
+.SH CONTROLS AVAILABLE DURING REVIEW
 .TP
 .BR J
 toggle the visibility of the back of a card
 .TP
 .BR K
-mark a card as wrong
+mark card as wrong
 .TP
 .BR L
-mark a card as right
+mark card as right
 .TP
 .BR D
 delete card (so it isn't reviewed again)
+
+.SH CONTROLS AVAILABLE AT THE END OF A REVIEW
+.TP
+.BR N
+start the next review
+.TP
+.BR F
+flip all cards (swap the front and back text)
+.TP
+.BR S
+shuffle cards
+.TP
+.BR D
+delete all cards that were marked as "correct" in the last review
+
+.SH CONTROLS AVAILABLE ANYTIME
 .TP
 .BR B
 toggle the drawing of card borders
 .TP
 .BR Q
 quit
-.TP
-.BR N
-start the next review (available when a review is finished)
-.TP
-.BR F
-flip all cards (swap the front and back text, available when a review is finished)
-.TP
-.BR S
-shuffle cards (available when a review is finished)
 
 .SH AUTHOR
 Luke Lawlor <lklawlor1@gmail.com>
