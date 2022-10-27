@@ -76,6 +76,14 @@ int read_deck(char **filenames, int filecount)
 		// Process characters from the file one by one
 		while ((c = fgetwc(cardfile)) != WEOF)
 		{
+			if (c == L'#')
+			{
+				// Found a comment, move to next line
+				while (c != '\n')
+					c = fgetwc(cardfile);
+				continue;
+			}
+
 			if (c == L'\n' || bp == MAX_LINE_CHARS - 1)
 			{
 				// Null-terminate the buffer so it can safely be copied into strings
